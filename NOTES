@@ -1,0 +1,160 @@
+Things that make the translation tricky:
+
+Isabelle has separate meta/object-logic connectives; types bool and
+prop are distinct. I have to wrap each theorem in Trueprop, and
+convert between Trueprop (x = y) and (x == y) as needed.
+
+Beta reduction! Most high-level operations on theorems that Isabelle
+provides do automatic normalization on terms, which includes beta
+reduction. To avoid beta reduction we must use only low-level kernel
+operations for manipulating theorems.
+
+Schematic variables! Another part of normalization is to replace
+ordinary free variables with schematic variables, which can be
+instantiated later (e.g. during unification). Also must use low-level
+operations to avoid this.
+
+Definition tools for constants and types automatically normalize
+theorems whether you want it or not. It is necessary to undo these
+normalization steps, re-instantiating fixed variables and types, and
+reversing beta reduction.
+
+Non-standard names: HOLLight uses some variable names and constant
+names that begin with underscores. This is not technically allowed in
+Isabelle, but it still seems to work via the low-level interfaces.
+Users probably won't be able to parse terms using such names, though.
+
+Substitution: OpenTheory allows substitution of terms for free
+variables in both the conclusion and hypotheses of a theorem. In
+Isabelle, this process is split into two steps: 1) generalization,
+where free variables are replaced with schematic variables; 2)
+specialization, where schematic variables are replaced with arbitrary
+terms. But Isabelle does not allow schematic variables in hypotheses,
+so to perform substitution we must first move all the hypotheses into
+the conclusion (stated with ==>), and move them back afterward.
+
+Differently-typed variables with the same name: This can occur in
+other HOL provers, but it causes some problems in Isabelle. The
+"generalize" operation takes only a variable name, without a type, so
+in some cases it generalizes too much! As a workaround, I can use
+"forall_intr" to use meta-universal quantifiers instead of schematic
+variables for doing substitution.
+
+----------------------------------------------------------------------
+
+Possible design:
+
+What if I maintained all imported theorems in beta-normal form?
+
+Problem: the type definition command requires the importer to destruct
+a term that is NOT in beta-normal form. We could keep theorems in
+beta-normal form, but we would also have to keep a non-normalized copy
+of each term as well.
+
+
+----------------------------------------------------------------------
+
+types: int, string, typeop, type, const, var, term, thm
+
+   1. i — a decimal integer                           => int
+   2. "s" — a quoted string                           => string
+   3. absTerm                                var term => term
+   4. absThm                                  var thm => thm
+   5. appTerm                               term term => term
+   6. appThm                                  thm thm => thm
+   7. assume                                     term => thm
+   8. axiom                                term* term => thm
+   9. betaConv                                   term => thm
+  10. cons                                       x xs => x:xs
+  11. const                                    string => const
+  12. constTerm                              const ty => term
+  13. deductAntisym                           thm thm => thm
+  14. def                                       x int => x
+  15. defineConst                         string term => const thm
+  16. defineTypeOp          string string string* thm => tyop const const thm thm
+  17. eqMp                                    thm thm => thm
+  18. nil                                             => []
+  19. opType                               tyop type* => type
+  20. pop                                           x =>
+  21. ref                                         int => x
+  22. refl                                       term => thm
+  23. remove                                      int => x
+  24. subst         ((string,type)*, (var,term)*) thm => thm
+  25. thm                              thm term* term =>
+  26. typeOp                                   string => tyop
+  27. var                                 string type => var
+  28. varTerm                                     var => term
+  29. varType                                  string => type
+
+----------------------------------------------------------------------
+
+Sorted by functionality:
+
+-- dictionary and stack management
+  14. def                                      x, int => x
+  21. ref                                         int => x
+  23. remove                                      int => x
+  20. pop                                           x =>
+
+-- lists
+  18. nil                                             => []
+  10. cons                                      x, xs => x:xs
+
+-- type,var,term constructors
+  26. typeOp                                   string => tyop
+  29. varType                                  string => type
+  19. opType                              tyop, type* => type
+  11. const                                    string => const
+  27. var                                string, type => var
+  12. constTerm                             const, ty => term
+  28. varTerm                                     var => term
+   3. absTerm                               var, term => term
+   5. appTerm                              term, term => term
+
+-- literals
+   1. i — a decimal integer                           => int
+   2. "s" — a quoted string                           => string
+
+-- logical inferences
+   4. absThm                                 var, thm => thm
+   6. appThm                                 thm, thm => thm
+   7. assume                                     term => thm
+   8. axiom                               term*, term => thm
+   9. betaConv                                   term => thm
+  22. refl                                       term => thm
+  13. deductAntisym                          thm, thm => thm
+  17. eqMp                                   thm, thm => thm
+  24. subst        ((string,type)*, (var,term)*), thm => thm
+
+-- definitions
+  15. defineConst                        string, term => const, thm
+  16. defineTypeOp       string, string, string*, thm => tyop, const, const, thm, thm
+
+-- exporting theorems
+  25. thm                            thm, term*, term =>
+
+
+----------------------------------------------------------------------
+
+Profiling: ML {* PolyML.profiling 1 *}
+
+We are spending a lot of time in Sorts.mg_domain(3)dom(1).
+
+Sorts.mg_domain:
+  Sorts.meet_sort
+  Sorts.of_sort
+  Sorts.of_sort_derivation
+  Sorts.witness_sorts
+  Type.arity_sorts
+  Type.unify
+  Class.print_classes
+
+Sorts.meet_sort:
+  Sorts.meet_sort_typ
+  Class.resort_terms
+
+Sorts.of_sort:
+  Type.of_sort
+
+Type.of_sort:
+  Type.typ_match
