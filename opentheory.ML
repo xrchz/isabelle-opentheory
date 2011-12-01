@@ -1,5 +1,5 @@
 (* opentheory.ML *)
-(* version: Isabelle 2011 *)
+(* version: Isabelle2011-1 *)
 
 signature OPENTHEORY =
 sig
@@ -203,7 +203,7 @@ fun define_const
     val bind = Binding.qualified_name s (* FIXME: do proper name translation *)
     val typ = Thm.typ_of (Thm.ctyp_of_term rhs)
     val _ = writeln (s ^ " :: " ^ Syntax.string_of_typ_global thy typ)
-    val (lhs, thy) = Sign.declare_const ((bind, typ), NoSyn) thy
+    val (lhs, thy) = Sign.declare_const_global ((bind, typ), NoSyn) thy
     val eqn = Logic.mk_equals (lhs, Thm.term_of rhs)
     val def = Thm.no_attributes (Binding.suffix_name "_def" bind, eqn)
     val (def_thm, thy) = yield_singleton (Global_Theory.add_defs false) def thy

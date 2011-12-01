@@ -1,3 +1,5 @@
+(* Version: Isabelle2011-1 *)
+
 theory OpenTheory
 imports Main Parity
 uses ("opentheory.ML")
@@ -50,15 +52,14 @@ setup {*
    ("Data.Bool.?!", @{const_name "Ex1"})]
 *}
 
-lemma [opentheory]:
-  "True = ((\<lambda>p::bool. p) = (\<lambda>p. p))"
-by auto
+lemma [opentheory]: "True = ((\<lambda>p::bool. p) = (\<lambda>p. p))"
+  by auto
 
 lemma [where 'A='A, opentheory]: "All = (\<lambda>P. P = (\<lambda>x::'A. True))"
-by (auto intro!: ext)
+  unfolding fun_eq_iff by auto
 
 lemma [opentheory]: "op \<longrightarrow> = (\<lambda>p q. (p \<and> q) = p)"
-by (auto intro!: ext)
+  unfolding fun_eq_iff by auto
 
 lemma [opentheory]: "op \<and> = (\<lambda>p q. (\<lambda>f. f p q :: bool) = (\<lambda>f. f True True))"
 apply (simp add: fun_eq_iff, safe, simp_all)
@@ -67,20 +68,20 @@ apply (drule_tac x="\<lambda>x y. y" in spec, simp)
 done
 
 lemma [opentheory]: "op \<or> = (\<lambda>p q. \<forall>r. (p \<longrightarrow> r) \<longrightarrow> (q \<longrightarrow> r) \<longrightarrow> r)"
-by (auto intro!: ext)
+  unfolding fun_eq_iff by auto
 
 lemma [where 'A='A, opentheory]: "Ex = (\<lambda>P. \<forall>q. (\<forall>x::'A. P x \<longrightarrow> q) \<longrightarrow> q)"
-by (auto intro!: ext)
+  unfolding fun_eq_iff by auto
 
 lemma [opentheory]: "False = (\<forall>p. p)"
-by auto
+  by auto
 
 lemma [opentheory]: "Not = (\<lambda>p. p \<longrightarrow> False)"
-by auto
+  by auto
 
 lemma [where 'A='A, opentheory]:
   "Ex1 = (\<lambda>P. Ex P \<and> (\<forall>x y::'A. P x \<and> P y \<longrightarrow> x = y))"
-by (auto intro!: ext)
+  unfolding fun_eq_iff by auto
 
 setup {* OpenTheory.read_article "bool-int-1.0.art" [] *}
 
@@ -99,15 +100,15 @@ by (auto intro: someI)
 
 lemma [where 'A='A and 'B='B, opentheory]:
   "\<forall>(f\<Colon>'A \<Rightarrow> 'B) g\<Colon>'A \<Rightarrow> 'B. (\<forall>x\<Colon>'A. f x = g x) \<longrightarrow> f = g"
-by (auto intro: ext)
+  unfolding fun_eq_iff by auto
 
 lemma [where 'A='A, opentheory]:
   "If = (\<lambda>t t1 t2. SOME x\<Colon>'A. (t = True \<longrightarrow> x = t1) \<and> (t = False \<longrightarrow> x = t2))"
-by (auto intro!: ext)
+  unfolding fun_eq_iff by auto
 
 lemma [where 'A='A and 'B='B, opentheory]:
   "\<forall>(f::'A \<Rightarrow> 'B) g. (f = g) = (\<forall>x. f x = g x)"
-by (auto intro: ext)
+  unfolding fun_eq_iff by auto
 
 setup {* OpenTheory.read_article "bool-choice-1.0.art" [] *}
 
@@ -274,12 +275,12 @@ lemma [where 'A='A, opentheory]:
     (\<forall>(h\<Colon>'A) t\<Colon>'A list. size (h # t) = Suc (size t))"
   "concat [] = ([]::'A list) \<and>
     (\<forall>(h\<Colon>'A list) t\<Colon>'A list list. concat (h # t) = h @ concat t)"
-by simp_all
+  by simp_all
 
 lemma [where 'A='A and 'B='B, opentheory]:
   "(\<forall>f\<Colon>'A \<Rightarrow> 'B. map f [] = []) \<and>
     (\<forall>(f\<Colon>'A \<Rightarrow> 'B) (h\<Colon>'A) t\<Colon>'A list. map f (h # t) = f h # map f t)"
-by simp
+  by simp
 
 setup {* OpenTheory.read_article "list-thm-1.0.art" [] *}
 
@@ -288,7 +289,7 @@ subsection {* Well-founded relations *}
 setup {* OpenTheory.add_const ("Function.id", @{const_name "id"}) *}
 
 lemma [where 'A='A, opentheory]: "\<forall>x::'A. id x = x"
-by simp
+  by simp
 
 ML {* PolyML.profiling 0 *}
 
