@@ -87,7 +87,7 @@ val typeS = @{sort "type"}
 fun prime a = "'" ^ a
 
 (* bool <-> prop *)
-fun mk_prop t = Thm.capply @{cterm Trueprop} t
+fun mk_prop t = Thm.apply @{cterm Trueprop} t
 fun un_prop t = Thm.dest_arg t
 
 (* = <-> == *)
@@ -97,11 +97,11 @@ fun mk_meta th =
     val xy = un_prop (Thm.cprop_of th)
     val x = Thm.dest_arg1 xy
     val y = Thm.dest_arg xy
-    val a = Thm.ctyp_of_term x
+    val a = Thm.ctyp_of_cterm x
     val T = Thm.typ_of a
-    val ca = Thm.ctyp_of thy (TVar (("'a", 0), typeS))
-    val cx = Thm.cterm_of thy (Var (("x", 0), T))
-    val cy = Thm.cterm_of thy (Var (("y", 0), T))
+    val ca = Thm.global_ctyp_of thy (TVar (("'a", 0), typeS))
+    val cx = Thm.global_cterm_of thy (Var (("x", 0), T))
+    val cy = Thm.global_cterm_of thy (Var (("y", 0), T))
     val rule = Thm.instantiate ([(ca, a)], [(cx, x), (cy, y)]) eq_reflection
     val th' = Thm.implies_elim rule th
     val (x', y') = Logic.dest_equals (Thm.concl_of th')
@@ -117,11 +117,11 @@ fun un_meta th =
     val xy = Thm.cprop_of th
     val x = Thm.dest_arg1 xy
     val y = Thm.dest_arg xy
-    val a = Thm.ctyp_of_term x
+    val a = Thm.ctyp_of_cterm x
     val T = Thm.typ_of a
-    val ca = Thm.ctyp_of thy (TVar (("'a", 0), typeS))
-    val cx = Thm.cterm_of thy (Var (("A", 0), T))
-    val cy = Thm.cterm_of thy (Var (("B", 0), T))
+    val ca = Thm.global_ctyp_of thy (TVar (("'a", 0), typeS))
+    val cx = Thm.global_cterm_of thy (Var (("A", 0), T))
+    val cy = Thm.global_cterm_of thy (Var (("B", 0), T))
     val rule = Thm.instantiate ([(ca, a)], [(cx, x), (cy, y)]) meta_eq_to_obj_eq
     val th' = Thm.implies_elim rule th
     val (x', y') = HOLogic.dest_eq (HOLogic.dest_Trueprop (Thm.concl_of th'))
@@ -201,7 +201,7 @@ fun define_const
   : (const * thm) * theory =
   let
     val bind = Binding.qualified_name s (* FIXME: do proper name translation *)
-    val typ = Thm.typ_of (Thm.ctyp_of_term rhs)
+    val typ = Thm.typ_of (Thm.ctyp_of_cterm rhs)
     val _ = writeln (s ^ " :: " ^ Syntax.string_of_typ_global thy typ)
     val (lhs, thy) = Sign.declare_const_global ((bind, typ), NoSyn) thy
     val eqn = Logic.mk_equals (lhs, Thm.term_of rhs)
@@ -238,12 +238,12 @@ fun define_tyop
     val set = HOLogic.Collect_const oldT $ phi
     val tac = EVERY' [rtac exI, rtac CollectI, rtac ax] 1
     val ((tyop, ({Rep_name, Abs_name, ...}, info)), thy) =
-        Typedef.add_typedef_global false NONE typ set morphs tac thy
+        Typedef.add_typedef_global false typ set morphs (K tac) thy
     val {type_definition, Rep_inverse, ...} = info
 
     (* instantiate Rep_inverse rule *)
-    val certT = Thm.ctyp_of thy
-    val cert = Thm.cterm_of thy
+    val certT = Thm.global_ctyp_of thy
+    val cert = Thm.global_cterm_of thy
     val tfrees = map (fn a => TFree (a, typeS)) args'
     val tvars = map (fn a => TVar ((a, 0), typeS)) args'
     val newT = Type (tyop, tfrees)
@@ -314,17 +314,17 @@ fun iff_intro th1 (*P*) th2 (*Q*) : thm (*P=Q*) =
 
 (* Thm.generalize doesn't distinguish similarly-named free variables
 with the same type. We will use forall_intr/forall_elim instead. *)
-fun subst (ts : (var * trm) list) (tys : (string * typ) list) th thy : thm =
+fun subst (ts : (var * trm) list) (tys : (string * typ) list) th (thy:theory) : thm =
   let
     (* Convert hyps to implication *)
-    val th = Drule.implies_intr_list (#hyps (crep_thm th)) th
+    val th = Drule.implies_intr_list (#hyps (Thm.crep_thm th)) th
 
     (* Substitute type variables *)
     val tfrees = map (prime o fst) tys
     val idx = Thm.maxidx_of th + 1
     val th = Thm.generalize (tfrees, []) idx th
         handle THM (s, _, _) => internal_err ("subst/generalize: " ^ s)
-    val certT = Thm.ctyp_of thy
+    val certT = Thm.global_ctyp_of thy
     val instT = map (fn (a, ty) => (certT (TVar ((prime a, idx), typeS)), certT ty)) tys
     val th = Thm.instantiate (instT, []) th
         handle THM (s, _, _) => internal_err ("subst/instantiate: " ^ s)
@@ -378,6 +378,7 @@ datatype command
   | CDefineTypeOp
   | CThm
 
+(*
 val cmd_table : command Symtab.table =
   Symtab.make
   [("absTerm", CAbsTerm),
@@ -407,6 +408,7 @@ val cmd_table : command Symtab.table =
    ("var", CVar),
    ("varTerm", CVarTerm),
    ("varType", CVarType)]
+*)
 
 local open Substring in
   val trimlr = fn s => string(trimr 1 (triml 1 (full s)))
@@ -511,7 +513,7 @@ fun raw_read_article
           SOME s' => s'
         | NONE => raise ERR ("No translation for tyop: " ^ s)
 
-    fun step command (st as {stack, dict, thy}) =
+    fun step command (st as {stack, dict, thy:theory}) =
       let
         fun st_ stack' = {stack=stack', dict=dict, thy=thy}
 
@@ -541,12 +543,12 @@ fun raw_read_article
           | f CConst (OName n :: os) =
             st_ (OConst (find_const n) :: os)
           | f CVar (OType ty :: OName n :: os) =
-            st_ (OVar (Thm.cterm_of thy (Free (n, ty))) :: os)
+            st_ (OVar (Thm.global_cterm_of thy (Free (n, ty))) :: os)
           | f CConstTerm (OType ty :: OConst c :: os) =
-            st_ (OTerm (Thm.cterm_of thy (Const (c, ty))) :: os)
+            st_ (OTerm (Thm.global_cterm_of thy (Const (c, ty))) :: os)
           | f CVarTerm (OVar t :: os) = st_ (OTerm t :: os)
-          | f CAbsTerm (OTerm b :: OVar v :: os) = st_ (OTerm (Thm.cabs v b) :: os)
-          | f CAppTerm (OTerm x :: OTerm f :: os) = st_ (OTerm (Thm.capply f x) :: os)
+          | f CAbsTerm (OTerm b :: OVar v :: os) = st_ (OTerm (Thm.lambda v b) :: os)
+          | f CAppTerm (OTerm x :: OTerm f :: os) = st_ (OTerm (Thm.apply f x) :: os)
 
           (* logical inferences *)
           | f CAxiom (OTerm t :: OList ts :: os) =
@@ -587,7 +589,7 @@ fun raw_read_article
           | f CThm (OTerm c :: OList ls :: OThm th :: os) =
             let
               val th' = alpha th (map dest_OTerm ls) c
-              val thy' = Context.theory_map (fst o add_thm o rpair th') thy
+              val thy' = Context.theory_map (Option.valOf o fst o add_thm o rpair th') thy
             in
               {stack = os, dict = dict, thy = thy'}
             end
@@ -609,7 +611,7 @@ fun raw_read_article
           loop (i+1) x'
         end
   in
-    #thy (loop 1 {stack = [], dict = Inttab.empty, thy = Theory.copy thy0})
+    #thy (loop 1 {stack = [], dict = Inttab.empty, thy =  thy0})
   end
 
 fun read_article filepath = raw_read_article (TextIO.openIn filepath)

@@ -2,7 +2,7 @@
 
 theory OpenTheory
 imports Main Parity
-uses ("opentheory.ML")
+
 begin
 
 subsection {* OpenTheory package *}
@@ -26,7 +26,8 @@ qed
 
 text {* Load opentheory package *}
 
-use "opentheory.ML"
+ML_file "opentheory.ML"
+
 setup OpenTheory.setup
 
 
