@@ -1,6 +1,7 @@
 (* opentheory.ML *)
 (* version: Isabelle2011-1 *)
 
+(*
 signature OPENTHEORY =
 sig
   val read_article : string -> (string * string) list -> theory -> theory
@@ -11,8 +12,9 @@ sig
   val add_const : string * string -> theory -> theory
   val setup : theory -> theory
 end
+*)
 
-structure OpenTheory : OPENTHEORY = struct
+structure OpenTheory (*: OPENTHEORY*) = struct
 
 exception ERR of string
 
@@ -49,11 +51,18 @@ val get_thms =
 
 local
   fun key_of th = Logic.list_implies (Thm.hyps_of th, Thm.concl_of th)
+  val fix_typ = Term.map_atyps (fn T => case T of TVar ((name, _), sort) => TFree (name, sort) | _ => T)
+  val fix_term = Term.map_types fix_typ
+  fun fix_thm thm =
+    let val get_ctyp = Thm.global_ctyp_of (Thm.theory_of_thm thm)
+    in Thm.instantiate (Term.add_tvars (Thm.prop_of thm) []
+                        |> map (fn x => apply2 get_ctyp (TVar x, fix_typ (TVar x))), []) thm
+    end
 in
 val add_thm =
-  Thm.declaration_attribute (fn th => OT_Thms.map (Termtab.update (key_of th, th)))
+  Thm.declaration_attribute (fn th => OT_Thms.map (Termtab.update (key_of th |> fix_term, fix_thm th)))
 val del_thm =
-  Thm.declaration_attribute (fn th => OT_Thms.map (Termtab.delete (key_of th)))
+  Thm.declaration_attribute (fn th => OT_Thms.map (Termtab.delete (key_of th |> fix_term)))
 end
 
 fun add_const data = OT_Consts.map (Symtab.update data)
@@ -256,9 +265,10 @@ fun define_tyop
     val RepT = newT --> oldT
     val AbsT = oldT --> newT
     val phiT = oldT --> HOLogic.boolT
+    val setT = Type ("Set.set", [oldT])
     val RepC = Const (Rep_name, RepT)
     val AbsC = Const (Abs_name, AbsT)
-    val typedefT = RepT --> AbsT --> phiT --> HOLogic.boolT
+    val typedefT = RepT --> AbsT --> setT --> HOLogic.boolT
     val typedefC = Const (@{const_name type_definition}, typedefT)
     val cprop = cert (HOLogic.mk_Trueprop (typedefC $ RepC $ AbsC $ set))
     val eq_th = Thm.symmetric (Thm.beta_conversion true cprop)
@@ -614,6 +624,8 @@ fun raw_read_article
     #thy (loop 1 {stack = [], dict = Inttab.empty, thy =  thy0})
   end
 
-fun read_article filepath = raw_read_article (TextIO.openIn filepath)
+fun read_article filepath renames thy = raw_read_article (TextIO.openIn (Path.append (Resources.master_directory thy) (Path.explode filepath) |> Path.implode)) renames thy
+(* FIXME: why doesn't this work?
+fun read_article filepath = File.open_input raw_read_article filepath *)
 
 end
