@@ -55,8 +55,12 @@ local
   val fix_term = Term.map_types fix_typ
   fun fix_thm thm =
     let val get_ctyp = Thm.global_ctyp_of (Thm.theory_of_thm thm)
-    in Thm.instantiate (Term.add_tvars (Thm.prop_of thm) []
+    in Thm.instantiate (Term.add_tvars (Thm.prop_of thm) [] 
+                          |> map (fn x => (x, get_ctyp (fix_typ (TVar x)))), []) thm
+(* Isa2016 update
+Thm.instantiate (Term.add_tvars (Thm.prop_of thm) []
                         |> map (fn x => apply2 get_ctyp (TVar x, fix_typ (TVar x))), []) thm
+*)
     end
 in
 val add_thm =
@@ -102,16 +106,24 @@ fun un_prop t = Thm.dest_arg t
 (* = <-> == *)
 fun mk_meta th =
   let
+(* Isa2016 update
     val thy = Thm.theory_of_thm th
+*)
     val xy = un_prop (Thm.cprop_of th)
     val x = Thm.dest_arg1 xy
     val y = Thm.dest_arg xy
     val a = Thm.ctyp_of_cterm x
     val T = Thm.typ_of a
+(* Isa2016 update
     val ca = Thm.global_ctyp_of thy (TVar (("'a", 0), typeS))
     val cx = Thm.global_cterm_of thy (Var (("x", 0), T))
     val cy = Thm.global_cterm_of thy (Var (("y", 0), T))
+*)
+    val rule = Thm.instantiate ([((("'a", 0), typeS), a)], 
+                                [((("x", 0), T), x), ((("y", 0), T), y)]) eq_reflection
+(* Isa2016 update
     val rule = Thm.instantiate ([(ca, a)], [(cx, x), (cy, y)]) eq_reflection
+*)
     val th' = Thm.implies_elim rule th
     val (x', y') = Logic.dest_equals (Thm.concl_of th')
     val _ = if (Thm.term_of x) aconv x' then () else internal_err "mk_meta"
@@ -122,16 +134,25 @@ fun mk_meta th =
 
 fun un_meta th =
   let
+(* Isa2016 update
     val thy = Thm.theory_of_thm th
+*)
     val xy = Thm.cprop_of th
     val x = Thm.dest_arg1 xy
     val y = Thm.dest_arg xy
     val a = Thm.ctyp_of_cterm x
     val T = Thm.typ_of a
+(* Isa2016 update
     val ca = Thm.global_ctyp_of thy (TVar (("'a", 0), typeS))
     val cx = Thm.global_cterm_of thy (Var (("A", 0), T))
     val cy = Thm.global_cterm_of thy (Var (("B", 0), T))
+*)
+
+    val rule = Thm.instantiate ([((("'a", 0), typeS), a)], 
+                                [((("A", 0), T), x), ((("B", 0), T), y)]) meta_eq_to_obj_eq
+(* Isa2016 update
     val rule = Thm.instantiate ([(ca, a)], [(cx, x), (cy, y)]) meta_eq_to_obj_eq
+*)
     val th' = Thm.implies_elim rule th
     val (x', y') = HOLogic.dest_eq (HOLogic.dest_Trueprop (Thm.concl_of th'))
     val _ = if (Thm.term_of x) aconv x' then () else internal_err "un_meta"
@@ -182,15 +203,21 @@ fun find_thm tab ts t : thm =
 
 fun iff_elim th1 (*Q=P*) th2 (*Q*) : thm (*P*) =
   let
-    val cQ = @{cpat "?Q::bool"}
-    val cP = @{cpat "?P::bool"}
+(* Isa2016 update
+    val cQ = @{cterm "?Q::bool"}
+    val cP = @{cterm "?P::bool"}
+*)
     val QP = Thm.dest_arg (Thm.cprop_of th1)
     val Q = Thm.dest_arg1 QP
     val P = Thm.dest_arg QP
     val Q' = Thm.dest_arg (Thm.cprop_of th2)
     val _ = if (Thm.term_of Q) aconv (Thm.term_of Q')
             then () else internal_err "iff_elim"
+    val rule = Thm.instantiate ([], [((("Q", 0), HOLogic.boolT), Q), 
+                                     ((("P", 0), HOLogic.boolT), P)]) iffD1
+(* Isa2016 update
     val rule = Thm.instantiate ([], [(cQ, Q), (cP, P)]) iffD1
+*)
     val th3 = Thm.implies_elim (Thm.implies_elim rule th1) th2
 
     (* Correctness check *)
@@ -216,6 +243,7 @@ fun define_const
     val eqn = Logic.mk_equals (lhs, Thm.term_of rhs)
     val def = Thm.no_attributes (Binding.suffix_name "_def" bind, eqn)
     val (def_thm, thy) = yield_singleton (Global_Theory.add_defs false) def thy
+
     val def_thm = Thm.legacy_freezeT def_thm
     (* TODO: Correctness check *)
     (* def_thm might be incorrect if rhs is not beta-normal *)
@@ -245,20 +273,28 @@ fun define_tyop
     val (phi, x) = Term.dest_comb (HOLogic.dest_Trueprop (Thm.concl_of ax))
     val oldT = fastype_of x
     val set = HOLogic.Collect_const oldT $ phi
-    val tac = EVERY' [rtac exI, rtac CollectI, rtac ax] 1
+(* *)
+    val mph = Typedef.make_morphisms ty_bind morphs
+    val tac = (fn x => EVERY' [resolve_tac x [exI], resolve_tac x [CollectI], resolve_tac x [ax]] 1)
     val ((tyop, ({Rep_name, Abs_name, ...}, info)), thy) =
-        Typedef.add_typedef_global false typ set morphs (K tac) thy
+        Typedef.add_typedef_global {overloaded=false} typ set (SOME mph) tac thy
     val {type_definition, Rep_inverse, ...} = info
 
     (* instantiate Rep_inverse rule *)
     val certT = Thm.global_ctyp_of thy
     val cert = Thm.global_cterm_of thy
     val tfrees = map (fn a => TFree (a, typeS)) args'
-    val tvars = map (fn a => TVar ((a, 0), typeS)) args'
+    val tvars = map (fn a => ((a, 0), typeS)) args'
     val newT = Type (tyop, tfrees)
+    val instT = map2 (fn x => fn y => (x, certT y)) tvars tfrees
+    val inst = [((("x", 0), newT), cert (Free ("a", newT)))]
+    val abs_rep = Thm.instantiate (instT, inst) Rep_inverse
+(* Isa2016 update
+    val tvars = map (fn a => TVar ((a, 0), typeS)) args'
     val instT = map2 (fn x => fn y => (certT x, certT y)) tvars tfrees
     val inst = [(cert (Var (("x", 0), newT)), cert (Free ("a", newT)))]
     val abs_rep = Thm.instantiate (instT, inst) Rep_inverse
+*)
 
     (* rebuild non-normalized type_definition rule *)
     val type_definition = Thm.instantiate (instT, []) type_definition
@@ -275,12 +311,20 @@ fun define_tyop
     val type_definition = Thm.equal_elim eq_th type_definition
 
     (* instantiate Abs_inverse rule *)
+    val instT = [((("'a", 0), typeS), certT newT),
+                 ((("'b", 0), typeS), certT oldT)]
+    val inst = [((("Rep", 0), RepT), cert RepC),
+                ((("Abs", 0), AbsT), cert AbsC),
+                ((("P", 0), phiT), cert phi),
+                ((("r", 0), oldT), cert (Free ("r", oldT)))]
+(* Isa2016 update
     val instT = [(certT (TVar (("'a", 0), typeS)), certT newT),
                  (certT (TVar (("'b", 0), typeS)), certT oldT)]
     val inst = [(cert (Var (("Rep", 0), RepT)), cert RepC),
                 (cert (Var (("Abs", 0), AbsT)), cert AbsC),
                 (cert (Var (("P", 0), phiT)), cert phi),
                 (cert (Var (("r", 0), oldT)), cert (Free ("r", oldT)))]
+*)
     val rule = Thm.instantiate (instT, inst) @{thm type_definition_Collect_iff}
     val rep_abs = Thm.implies_elim rule type_definition
   in
@@ -305,11 +349,17 @@ fun iff_intro th1 (*P*) th2 (*Q*) : thm (*P=Q*) =
     val th2 (*P->Q*) = Thm.implies_intr cprop1 th2
 
     (* Instantiate iffI rule *)
-    val cP = @{cpat "?P::bool"}
-    val cQ = @{cpat "?Q::bool"}
+(* Isa2016 update
+    val cP = @{cterm "?P::bool"}
+    val cQ = @{cterm "?Q::bool"}
+*)
     val P = un_prop cprop1
     val Q = un_prop cprop2
+   val rule = Thm.instantiate ([], [((("P", 0), HOLogic.boolT), P), 
+                                    ((("Q", 0), HOLogic.boolT), Q)]) iffI
+(* Isa2016 update
     val rule = Thm.instantiate ([], [(cP, P), (cQ, Q)]) iffI
+*)
     val th3 = Thm.implies_elim (Thm.implies_elim rule th2) th1
 
     (* Correctness check *)
@@ -327,7 +377,10 @@ with the same type. We will use forall_intr/forall_elim instead. *)
 fun subst (ts : (var * trm) list) (tys : (string * typ) list) th (thy:theory) : thm =
   let
     (* Convert hyps to implication *)
+    val th = Drule.implies_intr_list (Thm.chyps_of th) th
+(* Isa2016 update
     val th = Drule.implies_intr_list (#hyps (Thm.crep_thm th)) th
+*)
 
     (* Substitute type variables *)
     val tfrees = map (prime o fst) tys
@@ -335,7 +388,10 @@ fun subst (ts : (var * trm) list) (tys : (string * typ) list) th (thy:theory) : 
     val th = Thm.generalize (tfrees, []) idx th
         handle THM (s, _, _) => internal_err ("subst/generalize: " ^ s)
     val certT = Thm.global_ctyp_of thy
+    val instT = map (fn (a, ty) => (((prime a, idx), typeS), certT ty)) tys
+(* Isa2016 update
     val instT = map (fn (a, ty) => (certT (TVar ((prime a, idx), typeS)), certT ty)) tys
+*)
     val th = Thm.instantiate (instT, []) th
         handle THM (s, _, _) => internal_err ("subst/instantiate: " ^ s)
 

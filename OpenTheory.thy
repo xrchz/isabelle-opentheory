@@ -26,6 +26,7 @@ qed
 
 text {* Load opentheory package *}
 
+
 ML_file "opentheory.ML"
 
 setup OpenTheory.setup
@@ -94,18 +95,18 @@ setup {*
 *}
 
 lemma [opentheory]:
-  "\<forall>t\<Colon>'A \<Rightarrow> 'B. (\<lambda>x\<Colon>'A. t x) = t"
+  "\<forall>(t::'A \<Rightarrow> 'B). (\<lambda>(x::'A). t x) = t"
 by auto
 
-lemma [opentheory]: "\<forall>(P\<Colon>'A \<Rightarrow> bool) x\<Colon>'A. P x \<longrightarrow> P (Eps P)"
+lemma [opentheory]: "\<forall>(P :: 'A \<Rightarrow> bool) (x :: 'A). P x \<longrightarrow> P (Eps P)"
 by (auto intro: someI)
 
 lemma [opentheory]:
-  "\<forall>(f\<Colon>'A \<Rightarrow> 'B) g\<Colon>'A \<Rightarrow> 'B. (\<forall>x\<Colon>'A. f x = g x) \<longrightarrow> f = g"
+  "\<forall>(f :: 'A \<Rightarrow> 'B)(g :: 'A \<Rightarrow> 'B). (\<forall>x :: 'A. f x = g x) \<longrightarrow> f = g"
   unfolding fun_eq_iff by auto
 
 lemma [opentheory]:
-  "If = (\<lambda>t t1 t2. SOME x\<Colon>'A. (t = True \<longrightarrow> x = t1) \<and> (t = False \<longrightarrow> x = t2))"
+  "If = (\<lambda>t t1 t2. SOME(x::'A). (t = True \<longrightarrow> x = t1) \<and> (t = False \<longrightarrow> x = t2))"
   unfolding fun_eq_iff by auto
 
 lemma [opentheory]:
@@ -140,15 +141,15 @@ text {* Properties of constructors, induction and recursion: *}
 
 lemma [opentheory]:
   "\<forall>n. Suc n \<noteq> 0"
-  "\<forall>(m\<Colon>nat) n\<Colon>nat. (Suc m = Suc n) = (m = n)"
+  "\<forall>(m::nat) n::nat. (Suc m = Suc n) = (m = n)"
 by simp_all
 
 lemma [opentheory]:
-  "\<forall>P\<Colon>nat \<Rightarrow> bool. P (0\<Colon>nat) \<and> (\<forall>n\<Colon>nat. P n \<longrightarrow> P (Suc n)) \<longrightarrow> (\<forall>n\<Colon>nat. P n)"
+  "\<forall>P::nat \<Rightarrow> bool. P (0::nat) \<and> (\<forall>n::nat. P n \<longrightarrow> P (Suc n)) \<longrightarrow> (\<forall>n::nat. P n)"
 by (clarify, erule nat_induct, simp)
 
-lemma [opentheory]: "\<forall>(e\<Colon>'A) f\<Colon>'A \<Rightarrow> nat \<Rightarrow> 'A.
-   \<exists>fn\<Colon>nat \<Rightarrow> 'A. fn (0\<Colon>nat) = e \<and> (\<forall>n\<Colon>nat. fn (Suc n) = f (fn n) n)"
+lemma [opentheory]: "\<forall>(e::'A) f::'A \<Rightarrow> nat \<Rightarrow> 'A.
+   \<exists>(fn::nat \<Rightarrow> 'A). fn (0::nat) = e \<and> (\<forall>n::nat. fn (Suc n) = f (fn n) n)"
 by (intro allI, rule_tac x="rec_nat e (\<lambda>n a. f a n)" in exI, simp)
 
 text {* Binary numerals for natural numbers: *}
@@ -163,21 +164,21 @@ by (rule opentheory)+
 text {* Primitive recursion equations for constants: *}
 
 lemma [opentheory]:
-  "(\<forall>n. (0\<Colon>nat) + n = n) \<and> (\<forall>m n. Suc m + n = Suc (m + n))"
-  "(\<forall>n. (0\<Colon>nat) * n = 0) \<and> (\<forall>m n. Suc m * n = m * n + n)"
-  "(\<forall>m\<Colon>nat. m ^ 0 = bit1 0) \<and> (\<forall>(m\<Colon>nat) n. m ^ Suc n = m * m ^ n)"
+  "(\<forall>n. (0::nat) + n = n) \<and> (\<forall>m n. Suc m + n = Suc (m + n))"
+  "(\<forall>n. (0::nat) * n = 0) \<and> (\<forall>m n. Suc m * n = m * n + n)"
+  "(\<forall>m::nat. m ^ 0 = bit1 0) \<and> (\<forall>(m::nat) n. m ^ Suc n = m * m ^ n)"
 (*
-  "even (0\<Colon>nat) = True \<and> (\<forall>n. even (Suc n) = (\<not> even n))"
-  "odd (0\<Colon>nat) = False \<and> (\<forall>n. odd (Suc n) = (\<not> odd n))"
+  "even (0::nat) = True \<and> (\<forall>n. even (Suc n) = (\<not> even n))"
+  "odd (0::nat) = False \<and> (\<forall>n. odd (Suc n) = (\<not> odd n))"
 *)
 by (simp_all add: bit_simps)
 
 lemma [opentheory]:
-  "(\<forall>m. (m < (0\<Colon>nat)) = False) \<and> (\<forall>m n. (m < Suc n) = (m = n \<or> m < n))"
+  "(\<forall>m. (m < (0::nat)) = False) \<and> (\<forall>m n. (m < Suc n) = (m = n \<or> m < n))"
 by (simp add: less_Suc_eq disj_commute)
 
 lemma [opentheory]:
-  "(\<forall>m. (m \<le> (0\<Colon>nat)) = (m = (0\<Colon>nat))) \<and>
+  "(\<forall>m. (m \<le> (0::nat)) = (m = (0::nat))) \<and>
   (\<forall>m n. (m \<le> Suc n) = (m = Suc n \<or> m \<le> n))"
 by (simp add: le_Suc_eq disj_commute)
 
@@ -226,7 +227,7 @@ lemma [opentheory]:
   "\<forall>(x::'A) (y::'B). fst (x, y) = x"
   "\<forall>(x::'A) (y::'B). snd (x, y) = y"
   "\<forall>p. \<exists>(x::'A) (y::'B). p = (x, y)"
-  "\<forall>(x\<Colon>'A) (y\<Colon>'B) (a\<Colon>'A) b\<Colon>'B. ((x, y) = (a, b)) = (x = a \<and> y = b)"
+  "\<forall>(x::'A) (y::'B) (a::'A) b::'B. ((x, y) = (a, b)) = (x = a \<and> y = b)"
 by simp_all
 
 setup {* OpenTheory.read_article "pair-induct-1.0.art" [] *}
@@ -235,52 +236,52 @@ setup {* OpenTheory.read_article "pair-abs-1.0.art" [] *}
 text {* Constructors, induction, and recursion for options: *}
 
 lemma [opentheory]:
-  "\<forall>P\<Colon>'A option \<Rightarrow> bool. P None \<and> (\<forall>a\<Colon>'A. P (Some a)) \<longrightarrow> (\<forall>x\<Colon>'A option. P x)"
+  "\<forall>P::'A option \<Rightarrow> bool. P None \<and> (\<forall>a::'A. P (Some a)) \<longrightarrow> (\<forall>x::'A option. P x)"
 by (clarify, induct_tac x, simp_all)
 
 lemma [opentheory]:
-  "\<forall>(NONE'\<Colon>'Z) SOME'\<Colon>'A \<Rightarrow> 'Z.
-    \<exists>fn\<Colon>'A option \<Rightarrow> 'Z. fn None = NONE' \<and> (\<forall>a\<Colon>'A. fn (Some a) = SOME' a)"
+  "\<forall>(NONE'::'Z) SOME'::'A \<Rightarrow> 'Z.
+    \<exists>fn::'A option \<Rightarrow> 'Z. fn None = NONE' \<and> (\<forall>a::'A. fn (Some a) = SOME' a)"
 by (clarify, rule_tac x="\<lambda>x. case x of None \<Rightarrow> NONE' | Some y \<Rightarrow> SOME' y" in exI, simp)
 
 setup {* OpenTheory.read_article "option-thm-1.0.art" [] *}
 
 lemma [opentheory]:
-  "(\<forall>(b\<Colon>'B) f\<Colon>'A \<Rightarrow> 'B. case_option b f None = b) \<and>
-(\<forall>(b\<Colon>'B) (f\<Colon>'A \<Rightarrow> 'B) a\<Colon>'A. case_option b f (Some a) = f a)"
+  "(\<forall>(b::'B) f::'A \<Rightarrow> 'B. case_option b f None = b) \<and>
+(\<forall>(b::'B) (f::'A \<Rightarrow> 'B) a::'A. case_option b f (Some a) = f a)"
 by simp
 
 lemma [opentheory]:
-  "\<forall>x\<Colon>'A option. case_option None Some x = x"
+  "\<forall>x::'A option. case_option None Some x = x"
 by (clarify, case_tac x, simp_all)
 
 text {* Constructors, induction, and recursion for lists: *}
 
-lemma [opentheory]: "\<forall>P\<Colon>'A list \<Rightarrow> bool.
-   P [] \<and> (\<forall>(a0\<Colon>'A) a1\<Colon>'A list. P a1 \<longrightarrow> P (a0 # a1)) \<longrightarrow> (\<forall>x\<Colon>'A list. P x)"
+lemma [opentheory]: "\<forall>P::'A list \<Rightarrow> bool.
+   P [] \<and> (\<forall>(a0::'A) a1::'A list. P a1 \<longrightarrow> P (a0 # a1)) \<longrightarrow> (\<forall>x::'A list. P x)"
 by (clarify, erule list.induct, simp)
 
 lemma [opentheory]:
-  "\<forall>(NIL'\<Colon>'Z) CONS'\<Colon>'A \<Rightarrow> 'A list \<Rightarrow> 'Z \<Rightarrow> 'Z.
-   \<exists>fn\<Colon>'A list \<Rightarrow> 'Z.
+  "\<forall>(NIL'::'Z) CONS'::'A \<Rightarrow> 'A list \<Rightarrow> 'Z \<Rightarrow> 'Z.
+   \<exists>fn::'A list \<Rightarrow> 'Z.
       fn [] = NIL' \<and>
-      (\<forall>(a0\<Colon>'A) a1\<Colon>'A list. fn (a0 # a1) = CONS' a0 a1 (fn a1))"
+      (\<forall>(a0::'A) a1::'A list. fn (a0 # a1) = CONS' a0 a1 (fn a1))"
 by (intro allI, rule_tac x="rec_list NIL' CONS'" in exI, simp)
 
 text {* Primitive recursion equations for constants: *}
 
 lemma [opentheory]:
-  "(\<forall>l\<Colon>'A list. [] @ l = l) \<and>
-    (\<forall>(h\<Colon>'A) (t\<Colon>'A list) l\<Colon>'A list. (h # t) @ l = h # t @ l)"
-  "size ([]::'A list) = (0\<Colon>nat) \<and>
-    (\<forall>(h\<Colon>'A) t\<Colon>'A list. size (h # t) = Suc (size t))"
+  "(\<forall>l::'A list. [] @ l = l) \<and>
+    (\<forall>(h::'A) (t::'A list) l::'A list. (h # t) @ l = h # t @ l)"
+  "size ([]::'A list) = (0::nat) \<and>
+    (\<forall>(h::'A) t::'A list. size (h # t) = Suc (size t))"
   "concat [] = ([]::'A list) \<and>
-    (\<forall>(h\<Colon>'A list) t\<Colon>'A list list. concat (h # t) = h @ concat t)"
+    (\<forall>(h::'A list) t::'A list list. concat (h # t) = h @ concat t)"
   by simp_all
 
 lemma [opentheory]:
-  "(\<forall>f\<Colon>'A \<Rightarrow> 'B. map f [] = []) \<and>
-    (\<forall>(f\<Colon>'A \<Rightarrow> 'B) (h\<Colon>'A) t\<Colon>'A list. map f (h # t) = f h # map f t)"
+  "(\<forall>f::'A \<Rightarrow> 'B. map f [] = []) \<and>
+    (\<forall>(f::'A \<Rightarrow> 'B) (h::'A) t::'A list. map f (h # t) = f h # map f t)"
   by simp
 
 setup {* OpenTheory.read_article "list-thm-1.0.art" [] *}
@@ -293,6 +294,7 @@ lemma [opentheory]: "\<forall>x::'A. id x = x"
   by simp
 
 setup {* OpenTheory.read_article "relation-1.0.art" [] *}
+
 
 subsection {* Load parser theories *}
 
