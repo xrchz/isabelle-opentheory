@@ -1,4 +1,4 @@
-(* Version: Isabelle2011-1 *)
+(* Version: Isabelle2016 *)
 
 theory OpenTheory
 imports Main Parity
@@ -156,7 +156,7 @@ text {* Binary numerals for natural numbers: *}
 
 setup {* OpenTheory.read_article "natural-numeral-1.0.art" [] *}
 
-lemma bit_simps:
+lemma bit_simps[simp]:
   "bit0 0 = 0 \<and> (\<forall>n. bit0 (Suc n) = Suc (Suc (bit0 n)))"
   "\<forall>n. bit1 n = Suc (bit0 n)"
 by (rule opentheory)+
@@ -195,6 +195,8 @@ thm OpenTheory.my_even_def OpenTheory.Number.Natural.odd_def
 setup {* OpenTheory.read_article "natural-even-odd-thm-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-recursion-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-cases-1.0.art" [] *}
+
+
 
 subsection {* Configure other datatypes *}
 
@@ -309,6 +311,7 @@ OpenTheory.read_article "parser-1.5.art"
    ("HOLLight._64146", "HOLLight.\<alpha>64146"),
    ("HOLLight._64147", "HOLLight.\<alpha>64147")]
 *}
+
 
 thm opentheory
 
