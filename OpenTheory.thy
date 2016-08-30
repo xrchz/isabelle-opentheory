@@ -128,6 +128,7 @@ setup {*
    ("Number.Natural.suc", @{const_name "Suc"}),
    ("Number.Natural.+", @{const_name "plus"}),
    ("Number.Natural.*", @{const_name "times"}),
+   ("Number.Natural.-", @{const_name "minus"}),
    ("Number.Natural.even", "OpenTheory.my_even"),
    ("Number.Natural.odd", "odd"),
    ("Number.Natural.exp", @{const_name "power"}),

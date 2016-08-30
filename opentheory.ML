@@ -233,11 +233,15 @@ fun iff_elim th1 (*Q=P*) th2 (*Q*) : thm (*P*) =
     th3
   end
 
+
 fun define_const
     (s : string)
     (rhs : trm)
     (thy : theory)
+     T
   : (const * thm) * theory =
+(case T of
+  NONE =>
   let
     val bind = Binding.qualified_name s (* FIXME: do proper name translation *)
     val typ = Thm.typ_of (Thm.ctyp_of_cterm rhs)
@@ -256,6 +260,10 @@ fun define_const
   in
     ((const, un_meta def_thm), thy)
   end
+| SOME tab => let val _ = Symtab.lookup tab s 
+              in internal_err "overwriting of defined constants"
+              end)
+ 
 
 fun define_tyop
     (tyname : string)
@@ -276,7 +284,9 @@ fun define_tyop
     val (phi, x) = Term.dest_comb (HOLogic.dest_Trueprop (Thm.concl_of ax))
 
     val oldT = fastype_of x 
+
     val set = HOLogic.Collect_const oldT $ phi
+(* *)
     val mph = Typedef.make_morphisms ty_bind morphs
     val tac = (fn x => EVERY' [resolve_tac x [exI], resolve_tac x [CollectI], resolve_tac x [ax]] 1)
     val ((tyop, ({Rep_name, Abs_name, ...}, info)), thy) =
@@ -343,6 +353,7 @@ fun define_tyop6
     val oldT = fastype_of x 
 
     val set = HOLogic.Collect_const oldT $ phi
+(* *)
     val mph = Typedef.make_morphisms ty_bind morphs
     val tac = (fn x => EVERY' [resolve_tac x [exI], resolve_tac x [CollectI], resolve_tac x [ax]] 1)
     val ((tyop, ({Rep_name, Abs_name, ...}, info)), thy) =
@@ -464,7 +475,7 @@ fun subst (ts : (var * trm) list) (tys : (string * typ) list) th (thy:theory) : 
 
 (* proveHyp command in Version 6 *) 
 fun prove_hyp psi phi =
-  let val c = Thm.cprop_of phi  
+  let val c = Thm.cprop_of phi  (* or Thm.dest_arg(Thm.cprop_of phi)? *)
       val psi' = Thm.implies_intr c psi
   in
    Thm.implies_elim psi' phi
@@ -773,7 +784,7 @@ fun raw_read_article
             st_ (OThm (iff_elim fg f) :: os)
           | f CDefineConst (OTerm t :: OName n :: os) =
             let
-              val ((const, def), thy') = define_const n t thy
+              val ((const, def), thy') = define_const n t thy NONE (* consts_tab *)
             in
               {stack = OThm def :: OConst const :: os, dict = dict, thy = thy'}
             end
@@ -863,7 +874,7 @@ fun raw_read_article
             st_ (OThm (iff_elim fg f) :: os)
           | f CDefineConst (OTerm t :: OName n :: os) =
             let
-              val ((const, def), thy') = define_const n t thy
+              val ((const, def), thy') = define_const n t thy NONE (* consts_tab *)
             in
               {stack = OThm def :: OConst const :: os, dict = dict, thy = thy'}
             end
@@ -921,7 +932,7 @@ fun raw_read_article
                  fun proc_ext_asgs thy th consts [] = (thy, th, consts)
                    | proc_ext_asgs thy th consts ((x, _, n, (t, hyp))::xs) =
                        let val rhs = Thm.global_cterm_of thy t
-                           val ((c, def), thy') = define_const n rhs thy
+                           val ((c, def), thy') = define_const n rhs thy NONE
                            val _ = writeln("constant " ^ n ^ " defined as " ^ Syntax.string_of_term_global thy' t)
                            val ty = Thm.typ_of_cterm rhs
                            val ct = Thm.global_cterm_of thy' (Const(c, ty))
@@ -986,6 +997,9 @@ fun raw_read_article
                             end)
   in
     #thy (chk_version {stack = [], dict = Inttab.empty, thy =  thy0})
+(*
+    #thy (loop 1 {stack = [], dict = Inttab.empty, thy =  thy0})
+*)
   end
 
 fun read_article filepath renames thy = raw_read_article (TextIO.openIn (Path.append (Resources.master_directory thy) (Path.explode filepath) |> Path.implode)) renames thy
