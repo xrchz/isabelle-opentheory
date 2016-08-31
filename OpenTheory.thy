@@ -298,22 +298,4 @@ lemma [opentheory]: "\<forall>x::'A. id x = x"
 
 setup {* OpenTheory.read_article "relation-1.0.art" [] *}
 
-
-subsection {* Load parser theories *}
-
-setup {*
-OpenTheory.read_article "parser-1.5.art"
-  [("HOLLight._dest_rec", "HOLLight.Rep_recspace"),
-   ("HOLLight._mk_rec", "HOLLight.Abs_recspace"),
-   ("HOLLight._dest_stream", "HOLLight.Rep_stream"),
-   ("HOLLight._mk_stream", "HOLLight.Abs_stream"),
-   (* FIXME: mangle these names in reader *)
-   ("HOLLight._64145", "HOLLight.\<alpha>64145"),
-   ("HOLLight._64146", "HOLLight.\<alpha>64146"),
-   ("HOLLight._64147", "HOLLight.\<alpha>64147")]
-*}
-
-
-thm opentheory
-
 end
