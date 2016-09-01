@@ -407,9 +407,9 @@ setup {*
 *}
 
 
-setup {* OpenTheory.read_article "hol-base.art" [] *}
+setup {* OpenTheory.read_article "hol-base-1.2.art" [] *}
 
 
-setup {* OpenTheory.read_article "hol-monad.art" [] *}
+setup {* OpenTheory.read_article "hol-monad-1.1.art" [] *}
 
 end

@@ -13,7 +13,7 @@ setup {*
 *}
 
 
-setup {* OpenTheory.read_article "hol-words.art" [] *}
+setup {* OpenTheory.read_article "hol-words-1.2.art" [] *}
 
 
 end

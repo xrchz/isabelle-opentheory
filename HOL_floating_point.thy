@@ -10,6 +10,6 @@ setup {*
    ("HOL4.fcp.bit1", @{type_name "HOL4.fcp.bit1"})]
 *}
 
-setup {* OpenTheory.read_article "hol-floating-point.art" [] *}
+setup {* OpenTheory.read_article "hol-floating-point-1.2.art" [] *}
 
 end

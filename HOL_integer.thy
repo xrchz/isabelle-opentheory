@@ -17,7 +17,7 @@ setup {*
 *}
 
 
-setup {* OpenTheory.read_article "hol-integer.art" [] *}
+setup {* OpenTheory.read_article "hol-integer-1.1.art" [] *}
 
 
 end

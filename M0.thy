@@ -3,7 +3,7 @@ theory M0
 imports ARM
 begin
 
-setup {* OpenTheory.read_article "m0-model.art" [] *}
+setup {* OpenTheory.read_article "m0-model-1.0.art" [] *}
 
 
 setup {*
@@ -26,8 +26,8 @@ setup {*
    ("HOL4.m0.exception", @{type_name "HOL4.m0.exception"})]
 *}
 
-setup {* OpenTheory.read_article "m0-step.art" [] *}
-setup {* OpenTheory.read_article "m0-prog.art" [] *}
+setup {* OpenTheory.read_article "m0-step-1.0.art" [] *}
+setup {* OpenTheory.read_article "m0-prog-1.0.art" [] *}
 
 setup {*
   fold OpenTheory.add_tyop
@@ -36,7 +36,7 @@ setup {*
 
 *}
 
-setup {* OpenTheory.read_article "m0-decomp.art" [] *}
+setup {* OpenTheory.read_article "m0-decomp-1.0.art" [] *}
 
 
 end
