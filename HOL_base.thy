@@ -406,10 +406,15 @@ setup {*
    ("Data.Sum.+", @{type_name "Sum_Type.sum"})]
 *}
 
-
 setup {* OpenTheory.read_article "hol-base-1.2.art" [] *}
 
-
 setup {* OpenTheory.read_article "hol-monad-1.1.art" [] *}
+
+setup {* OpenTheory.read_article "hol-sort-1.0.art" [] *}
+
+setup {*
+  fold OpenTheory.add_const
+  [("HOL4.sorting.PERM", @{const_name "HOL4.sorting.PERM"})]
+*}
 
 end
