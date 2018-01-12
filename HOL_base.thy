@@ -391,7 +391,7 @@ setup {*
    ("Number.Natural.^", @{const_name "power"}),
    ("Number.Natural.>", @{const_name "grN"}),
    ("Number.Natural.>=", @{const_name "gr_eqN"}),
-   ("Number.Natural.mod", @{const_name "Divides.div_class.mod"}),
+   ("Number.Natural.mod", @{const_name "Rings.modulo_class.modulo"}),
    ("Number.Natural.div", @{const_name "Rings.divide_class.divide"}),
    ("Number.Natural.max", @{const_name "max"}),
    ("Number.Natural.min", @{const_name "min"}),

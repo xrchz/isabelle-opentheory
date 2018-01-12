@@ -1,5 +1,5 @@
 (* opentheory.ML *)
-(* version: Isabelle2016 *)
+(* version: Isabelle2017 *)
 
 
 signature OPENTHEORY =
@@ -154,7 +154,6 @@ fun abs_thm v th =
     un_meta (Thm.abstract_rule n v (mk_meta th))
   end
 
-(* fun app_thm th1 th2 = @{thm cong} OF [th1, th2] *)
 fun app_thm th1 th2 =
   let
     val th3 = un_meta (Thm.combination (mk_meta th1) (mk_meta th2))
