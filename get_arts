@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+install() {
+  ( opentheory info "$1" > /dev/null 2>/dev/null ) || opentheory install "$1"
+}
+
+create() {
+  [ -f "$ARTICLE.art" ] || opentheory info --article -o "$ARTICLE.art" "$ARTICLE"
+}
+
+mapfile -t ARTICLES < <(find . -name "*.thy" -exec grep -o -P '[-.a-z0-9]+(?=\.art)' '{}' \;)
+
+for ARTICLE in "${ARTICLES[@]}"; do
+  echo "Creating $ARTICLE.art"
+  install "$ARTICLE"
+  create "$ARTICLE"
+done
