@@ -53,7 +53,7 @@ where "isNone None = True"
 
 fun left_right :: "('A \<Rightarrow> 'C) \<Rightarrow> ('B \<Rightarrow> 'C) \<Rightarrow> 'A + 'B \<Rightarrow> 'C"
 where "left_right l r (Inl x) = l x" |
-      "left_right l r (Inr x) = r x" 
+      "left_right l r (Inr x) = r x"
 
 
 definition "injective f = inj_on f UNIV"
@@ -67,7 +67,7 @@ lemma[opentheory] :
 "\<forall>f::'A \<Rightarrow> 'B. surjective f = (\<forall>y::'B. \<exists>x::'A. y = f x)"
 by force
 
-lemma[opentheory] : 
+lemma[opentheory] :
 "\<forall>f::'A \<Rightarrow> 'B. injective f = (\<forall>(x1::'A) x2::'A. f x1 = f x2 \<longrightarrow> x1 = x2)"
 apply clarsimp
 apply(rule iffI)
@@ -86,48 +86,48 @@ apply(drule_tac y="Zero_Rep" in surjD)
 apply clarify
 apply(drule sym)
 apply(drule not_not[THEN iffD2])
-apply(erule notE) 
+apply(erule notE)
 apply(rule Suc_Rep_not_Zero_Rep)
 done
 
 
 definition emptyR :: "'a \<Rightarrow> 'b \<Rightarrow> bool"
 where "emptyR = (\<lambda>a b. False)"
- 
+
 declare emptyR_def[simp add]
 
 definition univR :: "'a \<Rightarrow> 'b \<Rightarrow> bool"
 where "univR = (\<lambda>a b. True)"
- 
+
 declare univR_def[simp add]
 
 
 definition subrelation :: "('a \<Rightarrow> 'b \<Rightarrow> bool) \<Rightarrow> ('a \<Rightarrow> 'b \<Rightarrow> bool) \<Rightarrow> bool"
-where "subrelation S T = (\<forall>a b. S a b \<longrightarrow> T a b)" 
+where "subrelation S T = (\<forall>a b. S a b \<longrightarrow> T a b)"
 
-lemma subrelation[simp] : "\<forall>r s. subrelation r s = (\<forall>x y. r x y \<longrightarrow> s x y)" 
+lemma subrelation[simp] : "\<forall>r s. subrelation r s = (\<forall>x y. r x y \<longrightarrow> s x y)"
 by(simp add: subrelation_def)
 
 
 definition reflexive :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool"
 where "reflexive T = (\<forall>a. T a a)"
 
-lemma reflexive[simp] : "\<forall>r. reflexive r = (\<forall>x. r x x)" 
+lemma reflexive[simp] : "\<forall>r. reflexive r = (\<forall>x. r x x)"
 by(simp add: reflexive_def)
 
 
 definition irreflexive :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool"
 where "irreflexive T = (\<forall>a. \<not> T a a)"
 
-lemma irreflexive[simp] : "\<forall>r. irreflexive r = (\<forall>x. \<not> r x x)" 
+lemma irreflexive[simp] : "\<forall>r. irreflexive r = (\<forall>x. \<not> r x x)"
 by(simp add: irreflexive_def)
 
 
 definition transitive :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool"
 where "transitive T = (\<forall>a b c. T a b \<longrightarrow> T b c \<longrightarrow> T a c)"
 
-lemma transitive[where 'a="'A", opentheory] : 
-"\<forall>T. transitive T = (\<forall>a b c. T a b \<and> T b c \<longrightarrow> T a c)" 
+lemma transitive[where 'a="'A", opentheory] :
+"\<forall>T. transitive T = (\<forall>a b c. T a b \<and> T b c \<longrightarrow> T a c)"
 by(simp add: transitive_def, blast)
 
 
@@ -138,15 +138,15 @@ lemma const[simp] : "const = (\<lambda>a b. a)" by(rule ext, rule ext, simp add:
 
 definition "combinatorS f g = (\<lambda>x. f x (g x))"
 
-lemma combinatorS[simp] : "combinatorS = (\<lambda>f g x. f x (g x))" 
+lemma combinatorS[simp] : "combinatorS = (\<lambda>f g x. f x (g x))"
 by(rule ext, rule ext, simp add: combinatorS_def)
 
-lemma combinator_S_const[opentheory] : "\<forall>(x :: 'A \<Rightarrow> 'B). combinatorS const x = id" 
+lemma combinator_S_const[opentheory] : "\<forall>(x :: 'A \<Rightarrow> 'B). combinatorS const x = id"
 by(simp add: const_def combinatorS_def id_def)
 
 definition "combinatorW f = (\<lambda>x. f x x)"
 
-lemma combinatorW[simp] : "combinatorW = (\<lambda>f x. f x x)" 
+lemma combinatorW[simp] : "combinatorW = (\<lambda>f x. f x x)"
 by(rule ext, simp add: combinatorW_def)
 
 
@@ -164,11 +164,11 @@ declare unionR_def[simp add]
 definition "interR s t = (\<lambda>a b. s a b \<and> t a b)"
 
 declare interR_def[simp add]
- 
+
 definition "unionS s t = (s \<union> t)"
 
 declare unionS_def[simp add]
- 
+
 definition "interS s t = (s \<inter> t)"
 
 declare interS_def[simp add]
@@ -186,7 +186,7 @@ definition "toSet t = {(a, b). t a b}"
 declare toSet_def[simp add]
 
 
-lemma[opentheory] : 
+lemma[opentheory] :
 "\<forall>p q r. (p \<and> q \<or> r) = ((p \<or> r) \<and> (q \<or> r))"
 by force
 
@@ -212,12 +212,12 @@ by force
 
 
 
-definition grN :: "nat \<Rightarrow> nat \<Rightarrow> bool" 
+definition grN :: "nat \<Rightarrow> nat \<Rightarrow> bool"
 where "grN n m = (n > m)"
 
 declare grN_def[simp add]
 
-definition gr_eqN :: "nat \<Rightarrow> nat \<Rightarrow> bool" 
+definition gr_eqN :: "nat \<Rightarrow> nat \<Rightarrow> bool"
 where "gr_eqN n m = (n \<ge> m)"
 
 declare gr_eqN_def[simp add]
@@ -240,11 +240,11 @@ by(clarsimp, induct_tac x, simp_all)
 
 lemma[opentheory] :
 "\<forall>m. \<not> m < (0::nat)"
-by simp 
+by simp
 
 lemma[opentheory] :
 "\<forall>n. Suc n \<noteq> (0::nat)"
-by simp 
+by simp
 
 lemma[opentheory] :
 "\<forall>m. m = (0::nat) \<or> (\<exists>n. m = Suc n)"
@@ -257,8 +257,8 @@ apply(rule_tac a=Parity.odd in someI2)
 by simp_all
 
 lemma[opentheory] :
-"my_even (0::nat)"
-apply(simp add: my_even_def) 
+"even (0::nat)"
+apply(simp add: even_def)
 apply(rule_tac a=Parity.even in someI2)
 by simp_all
 
@@ -269,8 +269,8 @@ apply(rule_tac a=Parity.odd in someI2)
 by simp_all
 
 lemma[opentheory] :
-"\<forall>n::nat. my_even (Suc n) = (\<not> my_even n)"
-apply(clarsimp simp: my_even_def)
+"\<forall>n::nat. Natural.even (Suc n) = (\<not> Natural.even n)"
+apply(clarsimp simp: even_def)
 apply(rule_tac a=Parity.even in someI2)
 by simp_all
 
@@ -286,7 +286,7 @@ declare flip_def[simp add]
 
 fun null
 where "null [] = True" |
-      "null _ = False" 
+      "null _ = False"
 
 lemma[opentheory] :
 "\<forall>l::'A list. null l = (l = [])"
@@ -304,13 +304,13 @@ by(rule ext, simp)
 fun forall :: "('a \<Rightarrow> bool) \<Rightarrow> 'a list \<Rightarrow> bool"
 where "forall P [] = True" |
       "forall P (x#xs) = (P x \<and> forall P xs)"
-  
+
 fun exists :: "('a \<Rightarrow> bool) \<Rightarrow> 'a list \<Rightarrow> bool"
 where "exists P [] = False" |
       "exists P (x#xs) = (P x \<or> exists P xs)"
 
 
-fun unzip 
+fun unzip
 where "unzip [] = ([], [])"
     | "unzip ((a, b)#xs) = (let (l, r) = unzip xs in
                              (a#l, b#r))"
@@ -326,7 +326,7 @@ by fastforce
 fun foldr' :: "'B \<Rightarrow> ('A \<Rightarrow> 'A list \<Rightarrow> 'B \<Rightarrow> 'B) \<Rightarrow> 'A list \<Rightarrow> 'B"
 where "foldr' b f [] = b" |
       "foldr' b f (x#xs) = f x xs (foldr' b f xs)"
-    
+
 
 lemma[opentheory] :
 "\<forall>(b::'B) f::'A \<Rightarrow> 'A list \<Rightarrow> 'B \<Rightarrow> 'B.
@@ -411,10 +411,5 @@ setup {* OpenTheory.read_article "hol-base-1.2.art" [] *}
 setup {* OpenTheory.read_article "hol-monad-1.1.art" [] *}
 
 setup {* OpenTheory.read_article "hol-sort-1.0.art" [] *}
-
-setup {*
-  fold OpenTheory.add_const
-  [("HOL4.sorting.PERM", @{const_name "HOL4.sorting.PERM"})]
-*}
 
 end

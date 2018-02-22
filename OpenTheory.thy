@@ -128,8 +128,6 @@ setup {*
    ("Number.Natural.+", @{const_name "plus"}),
    ("Number.Natural.*", @{const_name "times"}),
    ("Number.Natural.-", @{const_name "minus"}),
-   ("Number.Natural.even", "OpenTheory.my_even"),
-   ("Number.Natural.odd", "odd"),
    ("Number.Natural.exp", @{const_name "power"}),
    ("Number.Natural.<=", @{const_name "less_eq"}),
    ("Number.Natural.<", @{const_name "less"})]
@@ -190,8 +188,7 @@ setup {* OpenTheory.read_article "natural-order-thm-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-add-order-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-mult-order-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-set-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-even-odd-def-1.0.art" [("Number.Natural.even", "my_even")] *}
-thm OpenTheory.my_even_def OpenTheory.Number.Natural.odd_def
+setup {* OpenTheory.read_article "natural-even-odd-def-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-even-odd-thm-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-recursion-1.0.art" [] *}
 setup {* OpenTheory.read_article "natural-cases-1.0.art" [] *}
