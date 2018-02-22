@@ -1,7 +1,7 @@
 (* Version: Isabelle2016 *)
 
 theory OpenTheory
-imports Main Parity
+imports Main
 
 begin
 
@@ -85,7 +85,6 @@ lemma [opentheory]:
   "Ex1 = (\<lambda>P. Ex P \<and> (\<forall>x y::'A. P x \<and> P y \<longrightarrow> x = y))"
   unfolding fun_eq_iff by auto
 
-ML {* Resources.master_directory @{theory} *}
 setup {* OpenTheory.read_article "bool-int-1.0.art" [] *}
 
 setup {*
