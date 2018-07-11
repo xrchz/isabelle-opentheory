@@ -8,7 +8,7 @@ Authors
 -------
 
 * Brian Huffman: initial implementation, up to Isabelle2011-1
-* Japhet Lim: updates to Isabelle2015
+* Japheth Lim: updates to Isabelle2015
 * Ramana Kumar: updates to Isabelle2016, tweaks
 * Maksym Bortin: examples for OpenTheory, updates to Isabelle2017
 * Lars Hupel: tweaks
