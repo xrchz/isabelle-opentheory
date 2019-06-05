@@ -22,7 +22,7 @@ lemma[opentheory] :
 by fastforce
 
 lemma[opentheory] :
-"op \<circ> = (\<lambda>(f::'B \<Rightarrow> 'C) (g::'A \<Rightarrow> 'B) x::'A. f (g x))"
+"(\<circ>) = (\<lambda>(f::'B \<Rightarrow> 'C) (g::'A \<Rightarrow> 'B) x::'A. f (g x))"
 by((rule ext)+, simp)
 
 lemma[opentheory] :

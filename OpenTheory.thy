@@ -60,16 +60,16 @@ lemma [opentheory]: "True = ((\<lambda>p::bool. p) = (\<lambda>p. p))"
 lemma [opentheory]: "All = (\<lambda>P. P = (\<lambda>x::'A. True))"
   unfolding fun_eq_iff by auto
 
-lemma [opentheory]: "op \<longrightarrow> = (\<lambda>p q. (p \<and> q) = p)"
+lemma [opentheory]: "(\<longrightarrow>) = (\<lambda>p q. (p \<and> q) = p)"
   unfolding fun_eq_iff by auto
 
-lemma [opentheory]: "op \<and> = (\<lambda>p q. (\<lambda>f. f p q :: bool) = (\<lambda>f. f True True))"
+lemma [opentheory]: "(\<and>) = (\<lambda>p q. (\<lambda>f. f p q :: bool) = (\<lambda>f. f True True))"
 apply (simp add: fun_eq_iff, safe, simp_all)
 apply (drule_tac x="\<lambda>x y. x" in spec, simp)
 apply (drule_tac x="\<lambda>x y. y" in spec, simp)
 done
 
-lemma [opentheory]: "op \<or> = (\<lambda>p q. \<forall>r. (p \<longrightarrow> r) \<longrightarrow> (q \<longrightarrow> r) \<longrightarrow> r)"
+lemma [opentheory]: "(\<or>) = (\<lambda>p q. \<forall>r. (p \<longrightarrow> r) \<longrightarrow> (q \<longrightarrow> r) \<longrightarrow> r)"
   unfolding fun_eq_iff by auto
 
 lemma [opentheory]: "Ex = (\<lambda>P. \<forall>q. (\<forall>x::'A. P x \<longrightarrow> q) \<longrightarrow> q)"
