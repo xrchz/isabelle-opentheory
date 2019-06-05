@@ -3,28 +3,28 @@ imports HOL_floating_point
 begin
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.binary_ieee.rounding", @{type_name "HOL4.binary_ieee.rounding"})]
-*}
+\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("HOL4.state_transformer.FOR", @{const_name "HOL_base.HOL4.state_transformer.FOR"})]
-*}
+\<close>
 
-setup {* OpenTheory.read_article "arm-model-1.1.art" [] *}
+setup \<open>OpenTheory.read_article "arm-model-1.1.art" []\<close>
 
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.arm.VFPExtension", @{type_name "HOL4.arm.VFPExtension"})]
 
-*}
+\<close>
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.arm.arm_state", @{type_name "HOL4.arm.arm_state"}),
    ("HOL4.arm.SCR", @{type_name "HOL4.arm.SCR"}),
@@ -42,43 +42,43 @@ setup {*
    ("HOL4.arm.SRType", @{type_name "HOL4.arm.SRType"}),
    ("HOL4.arm.MachineCode", @{type_name "HOL4.arm.MachineCode"}),
    ("HOL4.arm.instruction", @{type_name "HOL4.arm.instruction"})]
-*}
+\<close>
 
 
 
-setup {* OpenTheory.read_article "arm-step-1.1.art" [] *}
+setup \<open>OpenTheory.read_article "arm-step-1.1.art" []\<close>
 
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.fcp.cart", @{type_name "HOL4.fcp.cart"}),
    ("HOL4.fcp.bit0", @{type_name "HOL4.fcp.bit0"}),
    ("HOL4.fcp.bit1", @{type_name "HOL4.fcp.bit1"})]
-*}
+\<close>
 
 lemma[opentheory] :
 "\<forall>A B C. (A \<or> B \<and> C) = ((A \<or> B) \<and> (A \<or> C))"
 by fastforce
 
 
-setup {* OpenTheory.read_article "machine-code-hoare-logic-1.1.art" [] *}
-setup {* OpenTheory.read_article "machine-code-hoare-logic-state-1.1.art" [] *}
+setup \<open>OpenTheory.read_article "machine-code-hoare-logic-1.1.art" []\<close>
+setup \<open>OpenTheory.read_article "machine-code-hoare-logic-state-1.1.art" []\<close>
 
 
 
-setup {* OpenTheory.read_article "arm-prog-1.1.art" [] *}
+setup \<open>OpenTheory.read_article "arm-prog-1.1.art" []\<close>
 
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.arm_prog.arm_component", @{type_name "HOL4.arm_prog.arm_component"}),
    ("HOL4.arm_prog.arm_data", @{type_name "HOL4.arm_prog.arm_data"})]
 
-*}
+\<close>
 
 
-setup {* OpenTheory.read_article "arm-decomp-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "arm-decomp-1.0.art" []\<close>
 
 end

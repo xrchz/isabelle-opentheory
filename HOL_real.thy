@@ -4,10 +4,10 @@ imports HOL_integer
 begin
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("Number.Natural.-", @{const_name "Groups.minus_class.minus"})]
-*}
+\<close>
 
 lemma[opentheory] :
 "\<forall>(m::nat) (n::nat) p::nat. p \<le> n \<longrightarrow> m * (n - p) = m * n - m * p"
@@ -123,27 +123,27 @@ lemma[opentheory] :
 by fastforce
 
 
-setup {* OpenTheory.read_article "natural-distance-1.52.art" [] *}
+setup \<open>OpenTheory.read_article "natural-distance-1.52.art" []\<close>
 
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("Number.Natural.distance", @{const_name "Number.Natural.distance"}),
     ("Set.{}", @{const_name "Orderings.bot_class.bot"})]
-*}
+\<close>
 
-setup {* OpenTheory.read_article "real-1.61.art" [] *}
+setup \<open>OpenTheory.read_article "real-1.61.art" []\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("Number.Real.real", @{type_name "Number.Real.real"}),
    ("HOL4.integer.int", @{type_name "HOL4.integer.int"})]
-*}
+\<close>
 
 
 
-setup {* OpenTheory.read_article "hol-real-1.1.art" [] *}
+setup \<open>OpenTheory.read_article "hol-real-1.1.art" []\<close>
 
 
 end

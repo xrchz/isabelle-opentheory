@@ -5,9 +5,9 @@ imports Main
 
 begin
 
-subsection {* OpenTheory package *}
+subsection \<open>OpenTheory package\<close>
 
-text {* Lemmas used by the package *}
+text \<open>Lemmas used by the package\<close>
 
 lemma type_definition_Collect_iff:
   assumes "type_definition Rep Abs (Collect P)"
@@ -24,7 +24,7 @@ next
   finally show "P r" by simp
 qed
 
-text {* Load opentheory package *}
+text \<open>Load opentheory package\<close>
 
 
 ML_file "opentheory.ML"
@@ -32,15 +32,15 @@ ML_file "opentheory.ML"
 setup OpenTheory.setup
 
 
-subsection {* Load boolean theories *}
+subsection \<open>Load boolean theories\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("->", @{type_name "fun"}),
    ("bool", @{type_name "bool"})]
-*}
+\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("=", @{const_name "HOL.eq"}),
    ("Data.Bool.!", @{const_name "All"}),
@@ -52,7 +52,7 @@ setup {*
    ("Data.Bool.F", @{const_name "False"}),
    ("Data.Bool.~", @{const_name "Not"}),
    ("Data.Bool.?!", @{const_name "Ex1"})]
-*}
+\<close>
 
 lemma [opentheory]: "True = ((\<lambda>p::bool. p) = (\<lambda>p. p))"
   by auto
@@ -85,13 +85,13 @@ lemma [opentheory]:
   "Ex1 = (\<lambda>P. Ex P \<and> (\<forall>x y::'A. P x \<and> P y \<longrightarrow> x = y))"
   unfolding fun_eq_iff by auto
 
-setup {* OpenTheory.read_article "bool-int-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "bool-int-1.0.art" []\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("Data.Bool.select", @{const_name "Eps"}),
    ("Data.Bool.cond", @{const_name "If"})]
-*}
+\<close>
 
 lemma [opentheory]:
   "\<forall>(t::'A \<Rightarrow> 'B). (\<lambda>(x::'A). t x) = t"
@@ -112,16 +112,16 @@ lemma [opentheory]:
   "\<forall>(f::'A \<Rightarrow> 'B) g. (f = g) = (\<forall>x. f x = g x)"
   unfolding fun_eq_iff by auto
 
-setup {* OpenTheory.read_article "bool-choice-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "bool-choice-1.0.art" []\<close>
 
 
-subsection {* Load natural number theories *}
+subsection \<open>Load natural number theories\<close>
 
-setup {*
+setup \<open>
   OpenTheory.add_tyop ("Number.Natural.natural", @{type_name "nat"})
-*}
+\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("Number.Numeral.zero", @{const_name "Groups.zero"}),
    ("Number.Natural.suc", @{const_name "Suc"}),
@@ -131,11 +131,11 @@ setup {*
    ("Number.Natural.exp", @{const_name "power"}),
    ("Number.Natural.<=", @{const_name "less_eq"}),
    ("Number.Natural.<", @{const_name "less"})]
-*}
+\<close>
 
-ML {* Binding.qualified_name @{const_name power} *}
+ML \<open>Binding.qualified_name @{const_name power}\<close>
 
-text {* Properties of constructors, induction and recursion: *}
+text \<open>Properties of constructors, induction and recursion:\<close>
 
 lemma [opentheory]:
   "\<forall>n. Suc n \<noteq> 0"
@@ -150,16 +150,16 @@ lemma [opentheory]: "\<forall>(e::'A) f::'A \<Rightarrow> nat \<Rightarrow> 'A.
    \<exists>(fn::nat \<Rightarrow> 'A). fn (0::nat) = e \<and> (\<forall>n::nat. fn (Suc n) = f (fn n) n)"
 by (intro allI, rule_tac x="rec_nat e (\<lambda>n a. f a n)" in exI, simp)
 
-text {* Binary numerals for natural numbers: *}
+text \<open>Binary numerals for natural numbers:\<close>
 
-setup {* OpenTheory.read_article "natural-numeral-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "natural-numeral-1.0.art" []\<close>
 
 lemma bit_simps[simp]:
   "bit0 0 = 0 \<and> (\<forall>n. bit0 (Suc n) = Suc (Suc (bit0 n)))"
   "\<forall>n. bit1 n = Suc (bit0 n)"
 by (rule opentheory)+
 
-text {* Primitive recursion equations for constants: *}
+text \<open>Primitive recursion equations for constants:\<close>
 
 lemma [opentheory]:
   "(\<forall>n. (0::nat) + n = n) \<and> (\<forall>m n. Suc m + n = Suc (m + n))"
@@ -180,31 +180,31 @@ lemma [opentheory]:
   (\<forall>m n. (m \<le> Suc n) = (m = Suc n \<or> m \<le> n))"
 by (simp add: le_Suc_eq disj_commute)
 
-setup {* OpenTheory.read_article "natural-add-thm-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-add-numeral-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-mult-thm-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-exp-thm-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-order-thm-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-add-order-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-mult-order-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-set-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-even-odd-def-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-even-odd-thm-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-recursion-1.0.art" [] *}
-setup {* OpenTheory.read_article "natural-cases-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "natural-add-thm-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-add-numeral-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-mult-thm-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-exp-thm-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-order-thm-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-add-order-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-mult-order-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-set-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-even-odd-def-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-even-odd-thm-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-recursion-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "natural-cases-1.0.art" []\<close>
 
 
 
-subsection {* Configure other datatypes *}
+subsection \<open>Configure other datatypes\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("Data.Pair.*", @{type_name "prod"}),
    ("Data.Option.option", @{type_name "option"}),
    ("Data.List.list", @{type_name "list"})]
-*}
+\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("Data.Pair.,", @{const_name "Pair"}),
    ("Data.Pair.fst", @{const_name "fst"}),
@@ -218,9 +218,9 @@ setup {*
    ("Data.List.length", @{const_name "size"}),
    ("Data.List.concat", @{const_name "concat"}),
    ("Data.List.map", @{const_name "map"})]
-*}
+\<close>
 
-text {* Constructors, induction, and recursion for pairs: *}
+text \<open>Constructors, induction, and recursion for pairs:\<close>
 
 lemma [opentheory]:
   "\<forall>(x::'A) (y::'B). fst (x, y) = x"
@@ -229,10 +229,10 @@ lemma [opentheory]:
   "\<forall>(x::'A) (y::'B) (a::'A) b::'B. ((x, y) = (a, b)) = (x = a \<and> y = b)"
 by simp_all
 
-setup {* OpenTheory.read_article "pair-induct-1.0.art" [] *}
-setup {* OpenTheory.read_article "pair-abs-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "pair-induct-1.0.art" []\<close>
+setup \<open>OpenTheory.read_article "pair-abs-1.0.art" []\<close>
 
-text {* Constructors, induction, and recursion for options: *}
+text \<open>Constructors, induction, and recursion for options:\<close>
 
 lemma [opentheory]:
   "\<forall>P::'A option \<Rightarrow> bool. P None \<and> (\<forall>a::'A. P (Some a)) \<longrightarrow> (\<forall>x::'A option. P x)"
@@ -243,7 +243,7 @@ lemma [opentheory]:
     \<exists>fn::'A option \<Rightarrow> 'Z. fn None = NONE' \<and> (\<forall>a::'A. fn (Some a) = SOME' a)"
 by (clarify, rule_tac x="\<lambda>x. case x of None \<Rightarrow> NONE' | Some y \<Rightarrow> SOME' y" in exI, simp)
 
-setup {* OpenTheory.read_article "option-thm-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "option-thm-1.0.art" []\<close>
 
 lemma [opentheory]:
   "(\<forall>(b::'B) f::'A \<Rightarrow> 'B. case_option b f None = b) \<and>
@@ -254,7 +254,7 @@ lemma [opentheory]:
   "\<forall>x::'A option. case_option None Some x = x"
 by (clarify, case_tac x, simp_all)
 
-text {* Constructors, induction, and recursion for lists: *}
+text \<open>Constructors, induction, and recursion for lists:\<close>
 
 lemma [opentheory]: "\<forall>P::'A list \<Rightarrow> bool.
    P [] \<and> (\<forall>(a0::'A) a1::'A list. P a1 \<longrightarrow> P (a0 # a1)) \<longrightarrow> (\<forall>x::'A list. P x)"
@@ -267,7 +267,7 @@ lemma [opentheory]:
       (\<forall>(a0::'A) a1::'A list. fn (a0 # a1) = CONS' a0 a1 (fn a1))"
 by (intro allI, rule_tac x="rec_list NIL' CONS'" in exI, simp)
 
-text {* Primitive recursion equations for constants: *}
+text \<open>Primitive recursion equations for constants:\<close>
 
 lemma [opentheory]:
   "(\<forall>l::'A list. [] @ l = l) \<and>
@@ -283,15 +283,15 @@ lemma [opentheory]:
     (\<forall>(f::'A \<Rightarrow> 'B) (h::'A) t::'A list. map f (h # t) = f h # map f t)"
   by simp
 
-setup {* OpenTheory.read_article "list-thm-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "list-thm-1.0.art" []\<close>
 
-subsection {* Well-founded relations *}
+subsection \<open>Well-founded relations\<close>
 
-setup {* OpenTheory.add_const ("Function.id", @{const_name "id"}) *}
+setup \<open>OpenTheory.add_const ("Function.id", @{const_name "id"})\<close>
 
 lemma [opentheory]: "\<forall>x::'A. id x = x"
   by simp
 
-setup {* OpenTheory.read_article "relation-1.0.art" [] *}
+setup \<open>OpenTheory.read_article "relation-1.0.art" []\<close>
 
 end
