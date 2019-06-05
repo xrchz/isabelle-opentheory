@@ -1,5 +1,5 @@
 (* opentheory.ML *)
-(* version: Isabelle2017 *)
+(* version: Isabelle2019 *)
 
 
 signature OPENTHEORY =

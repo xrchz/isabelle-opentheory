@@ -2,7 +2,7 @@ isabelle-opentheory
 ===================
 
 This is a proof of concept demonstrating the import of OpenTheory articles into Isabelle.
-It has been tested with Isabelle2017.
+It has been tested with Isabelle2019.
 
 Authors
 -------
@@ -12,6 +12,7 @@ Authors
 * Ramana Kumar: updates to Isabelle2016, tweaks
 * Maksym Bortin: examples for OpenTheory, updates to Isabelle2017
 * Lars Hupel: tweaks
+* Fabian Immler: updates to Isabelle2019
 
 Setup
 -----

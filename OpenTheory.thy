@@ -1,4 +1,4 @@
-(* Version: Isabelle2016 *)
+(* Version: Isabelle2019 *)
 
 theory OpenTheory
 imports Main
