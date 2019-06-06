@@ -12,7 +12,7 @@ Authors
 * Ramana Kumar: updates to Isabelle2016, tweaks
 * Maksym Bortin: examples for OpenTheory, updates to Isabelle2017
 * Lars Hupel: tweaks
-* Fabian Immler: updates to Isabelle2019
+* Fabian Immler: updates to Isabelle2019, tweaks
 
 Setup
 -----

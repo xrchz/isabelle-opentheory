@@ -19,7 +19,7 @@ structure OpenTheory : OPENTHEORY = struct
 exception ERR of string
 
 val freeze_thm = Thm.unvarify_global
-             
+
 fun internal_err msg = raise ERR ("Internal error: " ^ msg)
 
 (** Theory data **)
@@ -612,7 +612,6 @@ val cmd_table : command Symtab.table =
 
 local open Substring in
   val trimlr = fn s => string(trimr 1 (triml 1 (full s)))
-  val trimr  = fn s => string(trimr 1 (full s))
 end
 
 fun parse s =
@@ -699,7 +698,7 @@ val dest_OVar_OTerm =
       | _ => internal_err "dest_OVar_OTerm")
 
 fun raw_read_article
-      (input : TextIO.instream)
+      (path : Path.T)
       (renaming : (string * string) list)
       (thy0 : theory) : theory =
   let
@@ -721,197 +720,111 @@ fun raw_read_article
           SOME s' => s'
         | NONE => raise ERR ("No translation for tyop: " ^ s)
 
-    fun step command (st as {stack, dict, thy:theory}) =
+    fun step command (st as {stack, dict, thy:theory, version:int}) =
       let
-        fun st_ stack' = {stack=stack', dict=dict, thy=thy}
+        fun st_ stack' = {stack=stack', dict=dict, thy=thy, version=version}
 
         fun find k =
           case Inttab.lookup dict k of
             SOME x => x | NONE => internal_err "dictionary lookup failed"
 
-        fun f (CNum i) os = st_ (ONum i :: os)
-          | f (CName n) os = st_ (OName (rename n) :: os)
-          | f (CComment _) _ = st
-          | f CDef (ONum k :: x :: os) =
-              {stack = x :: os, dict = Inttab.update (k, x) dict, thy = thy}
-          | f CRef (ONum k :: os) = st_ (find k :: os)
-          | f CRemove (ONum k :: os) =
-              {stack = find k :: os, dict = Inttab.delete k dict, thy = thy}
-          | f CPop (_ :: os) = st_ (os)
-          | f CNil os = st_ (OList [] :: os)
-          | f CCons (OList t :: h :: os) = st_ (OList (h :: t) :: os)
+        fun f _ (CNum i) os = st_ (ONum i :: os)
+          | f _ (CName n) os = st_ (OName (rename n) :: os)
+          | f _ (CComment _) _ = st
+          | f _ CDef (ONum k :: x :: os) =
+              {stack = x :: os, dict = Inttab.update (k, x) dict, thy = thy, version = version}
+          | f _ CRef (ONum k :: os) = st_ (find k :: os)
+          | f _ CRemove (ONum k :: os) =
+              {stack = find k :: os, dict = Inttab.delete k dict, thy = thy, version = version}
+          | f _ CPop (_ :: os) = st_ (os)
+          | f _ CNil os = st_ (OList [] :: os)
+          | f _ CCons (OList t :: h :: os) = st_ (OList (h :: t) :: os)
 
           (* types and terms *)
-          | f CTypeOp (OName n :: os) =
+          | f _ CTypeOp (OName n :: os) =
             st_ (OTypeOp (find_tyop n) :: os)
-          | f CVarType (OName n :: os) =
+          | f _ CVarType (OName n :: os) =
             st_ (OType (Term.TFree (prime n, typeS)) :: os)
-          | f COpType (OList ls :: OTypeOp tyop :: os) =
+          | f _ COpType (OList ls :: OTypeOp tyop :: os) =
             st_ (OType (Term.Type (tyop, map dest_OType ls)) :: os)
-          | f CConst (OName n :: os) =
+          | f _ CConst (OName n :: os) =
             st_ (OConst (find_const n) :: os)
-          | f CVar (OType ty :: OName n :: os) =
+          | f _ CVar (OType ty :: OName n :: os) =
             st_ (OVar (Thm.global_cterm_of thy (Free (n, ty))) :: os)
-          | f CConstTerm (OType ty :: OConst c :: os) =
-            st_ (OTerm (Thm.global_cterm_of thy (Const (c, ty))) :: os)
-
-          | f CVarTerm (OVar t :: os) = st_ (OTerm t :: os)
-          | f CAbsTerm (OTerm b :: OVar v :: os) = st_ (OTerm (Thm.lambda v b) :: os)
-          | f CAppTerm (OTerm x :: OTerm f :: os) = st_ (OTerm (Thm.apply f x) :: os)
-
-          (* logical inferences *)
-          | f CAxiom (OTerm t :: OList ts :: os) =
-             let val (thm, thy') = find_thm thms_net (map dest_OTerm ts) t thy
-             in
-               {stack = OThm thm :: os, dict = dict, thy = thy'}
-             end
-
-          | f CAssume (OTerm t :: os) = st_ (OThm (assume t) :: os)
-          | f CAbsThm (OThm th :: OVar v :: os) = st_ (OThm (abs_thm v th) :: os)
-          | f CAppThm (OThm xy :: OThm fg :: os) = st_ (OThm (app_thm fg xy) :: os)
-          | f CBetaConv (OTerm t :: os) = st_ (OThm (beta_conv t) :: os)
-          | f CRefl (OTerm t::os) = st_ (OThm (refl t) :: os)
-          | f CSubst (OThm th :: OList [OList tys, OList tms] :: os) =
-            let
-              val tys = map dest_OName_OType tys
-              val tms = map dest_OVar_OTerm tms
-              val th' = subst tms tys th thy
-            in st_ (OThm th' :: os) end
-          | f CDeductAntisym (OThm t2 :: OThm t1 :: os) =
-            st_ (OThm (iff_intro t1 t2) :: os)
-          | f CEqMp (OThm f :: OThm fg :: os) =
-            st_ (OThm (iff_elim fg f) :: os)
-          | f CDefineConst (OTerm t :: OName n :: os) =
-            let
-              val ((const, def), thy') = define_const n t thy NONE (* consts_tab *)
-            in
-              {stack = OThm def :: OConst const :: os, dict = dict, thy = thy'}
-            end
-          | f CDefineTypeOp
-              (OThm ax :: OList ls :: OName rep :: OName abs :: OName n :: os) =
-            let
-              val ls = map dest_OName ls
-              val ((tyop, abs, rep, abs_rep, rep_abs), thy') =
-                  define_tyop n abs rep ls ax thy
-            in
-              {stack = OThm rep_abs :: OThm abs_rep ::
-                       OConst rep :: OConst abs ::
-                       OTypeOp tyop :: os,
-               dict = dict, thy = thy'}
-            end
-          | f CThm (OTerm c :: OList ls :: OThm th :: os) =
-            let
-              val th' = alpha th (map dest_OTerm ls) c
-              val thy' = Context.theory_map (Option.valOf o fst o add_thm o rpair th') thy
-            in
-              {stack = os, dict = dict, thy = thy'}
-            end
-             
-          | f _ _ = internal_err "illegal stack configuration"
-      in
-        f command stack
-      end
-
-
-    fun step6 command (st as {stack, dict, thy:theory}) =
-      let
-        fun st_ stack' = {stack=stack', dict=dict, thy=thy}
-
-        fun find k =
-          case Inttab.lookup dict k of
-            SOME x => x | NONE => internal_err "dictionary lookup failed"
-
-        fun f (CNum i) os = st_ (ONum i :: os)
-          | f (CName n) os = st_ (OName (rename n) :: os)
-          | f (CComment _) _ = st
-          | f CDef (ONum k :: x :: os) =
-              {stack = x :: os, dict = Inttab.update (k, x) dict, thy = thy}
-          | f CRef (ONum k :: os) = st_ (find k :: os)
-          | f CRemove (ONum k :: os) =
-              {stack = find k :: os, dict = Inttab.delete k dict, thy = thy}
-          | f CPop (_ :: os) = st_ (os)
-          | f CNil os = st_ (OList [] :: os)
-          | f CCons (OList t :: h :: os) = st_ (OList (h :: t) :: os)
-
-          (* types and terms *)
-          | f CTypeOp (OName n :: os) =
-            st_ (OTypeOp (find_tyop n) :: os)
-          | f CVarType (OName n :: os) =
-            st_ (OType (Term.TFree (prime n, typeS)) :: os)
-          | f COpType (OList ls :: OTypeOp tyop :: os) =
-            st_ (OType (Term.Type (tyop, map dest_OType ls)) :: os)
-          | f CConst (OName n :: os) =
-            st_ (OConst (find_const n) :: os)
-          | f CVar (OType ty :: OName n :: os) =
-            st_ (OVar (Thm.global_cterm_of thy (Free (n, ty))) :: os)
-          | f CConstTerm (OType ty :: OConst c :: os) =
+          | f _ CConstTerm (OType ty :: OConst c :: os) =
               st_ (OTerm (Thm.global_cterm_of thy (Const (c, ty))) :: os)
-          | f CVarTerm (OVar t :: os) = st_ (OTerm t :: os)
-          | f CAbsTerm (OTerm b :: OVar v :: os) = st_ (OTerm (Thm.lambda v b) :: os)
-          | f CAppTerm (OTerm x :: OTerm f :: os) = st_ (OTerm (Thm.apply f x) :: os)
+          | f _ CVarTerm (OVar t :: os) = st_ (OTerm t :: os)
+          | f _ CAbsTerm (OTerm b :: OVar v :: os) = st_ (OTerm (Thm.lambda v b) :: os)
+          | f _ CAppTerm (OTerm x :: OTerm f :: os) = st_ (OTerm (Thm.apply f x) :: os)
 
           (* logical inferences *)
-          | f CAxiom (OTerm t :: OList ts :: os) =
+          | f _ CAxiom (OTerm t :: OList ts :: os) =
              let val (thm, thy') = find_thm thms_net (map dest_OTerm ts) t thy
              in
-               {stack = OThm thm :: os, dict = dict, thy = thy'}
+               {stack = OThm thm :: os, dict = dict, thy = thy', version = version}
              end
-          | f CAssume (OTerm t :: os) = st_ (OThm (assume t) :: os)
-          | f CAbsThm (OThm th :: OVar v :: os) = st_ (OThm (abs_thm v th) :: os)
-          | f CAppThm (OThm xy :: OThm fg :: os) = st_ (OThm (app_thm fg xy) :: os)
-          | f CBetaConv (OTerm t :: os) = st_ (OThm (beta_conv t) :: os)
-          | f CRefl (OTerm t::os) = st_ (OThm (refl t) :: os)
-          | f CSubst (OThm th :: OList [OList tys, OList tms] :: os) =
+          | f _ CAssume (OTerm t :: os) = st_ (OThm (assume t) :: os)
+          | f _ CAbsThm (OThm th :: OVar v :: os) = st_ (OThm (abs_thm v th) :: os)
+          | f _ CAppThm (OThm xy :: OThm fg :: os) = st_ (OThm (app_thm fg xy) :: os)
+          | f _ CBetaConv (OTerm t :: os) = st_ (OThm (beta_conv t) :: os)
+          | f _ CRefl (OTerm t::os) = st_ (OThm (refl t) :: os)
+          | f _ CSubst (OThm th :: OList [OList tys, OList tms] :: os) =
             let
               val tys = map dest_OName_OType tys
               val tms = map dest_OVar_OTerm tms
               val th' = subst tms tys th thy
             in st_ (OThm th' :: os) end
-          | f CDeductAntisym (OThm t2 :: OThm t1 :: os) =
+          | f _ CDeductAntisym (OThm t2 :: OThm t1 :: os) =
             st_ (OThm (iff_intro t1 t2) :: os)
-          | f CEqMp (OThm f :: OThm fg :: os) =
+          | f _ CEqMp (OThm f :: OThm fg :: os) =
             st_ (OThm (iff_elim fg f) :: os)
-          | f CDefineConst (OTerm t :: OName n :: os) =
+          | f _ CDefineConst (OTerm t :: OName n :: os) =
             let
               val ((const, def), thy') = define_const n t thy NONE (* consts_tab *)
             in
-              {stack = OThm def :: OConst const :: os, dict = dict, thy = thy'}
+              {stack = OThm def :: OConst const :: os, dict = dict, thy = thy', version = version}
             end
-          | f CDefineTypeOp
+          | f v CDefineTypeOp
               (OThm ax :: OList ls :: OName rep :: OName abs :: OName n :: os) =
             let
               val ls = map dest_OName ls
-              val ((tyop, abs, rep, abs_rep, rep_abs), thy') =
-                  define_tyop6 n abs rep ls ax thy
+              val the_define_tyop = (case v of
+                      5 => define_tyop
+                    | 6 => define_tyop6
+                    | v => raise ERR ("Unknown version for defineTypeOp: " ^ string_of_int v))
+              val ((tyop, abs, rep, abs_rep, rep_abs), thy') = the_define_tyop n abs rep ls ax thy
             in
               {stack = OThm rep_abs :: OThm abs_rep ::
                        OConst rep :: OConst abs ::
                        OTypeOp tyop :: os,
-               dict = dict, thy = thy'}
+               dict = dict, thy = thy', version = version}
             end
-          | f CThm (OTerm c :: OList ls :: OThm th :: os) =
+          | f _ CThm (OTerm c :: OList ls :: OThm th :: os) =
             let
               val th' = alpha th (map dest_OTerm ls) c
               val thy' = Context.theory_map (Option.valOf o fst o add_thm o rpair th') thy
             in
-              {stack = os, dict = dict, thy = thy'}
+              {stack = os, dict = dict, thy = thy', version = version}
             end
 
-          | f CHdTl (OList (h :: t) :: os) = st_ (OList t :: h :: os) 
+          (* Version 6 *)
+          | f _ CVersion (ONum v :: os) = {stack=os, dict=dict, thy=thy, version=v}
 
-          | f CPragma (OName x :: os) = (let val _ = if x = "debug" then writeln "Some debug info..."
+          | f 6 CHdTl (OList (h :: t) :: os) = st_ (OList t :: h :: os)
+
+          | f 6 CPragma (OName x :: os) = (let val _ = if x = "debug" then writeln "Some debug info..."
                                                      else ()
-                                         in  {stack = os, dict = dict, thy = thy} end)       
-          | f CProveHyp (OThm psi :: OThm phi :: os) =
+                                         in  {stack = os, dict = dict, thy = thy, version = version} end)
+          | f 6 CProveHyp (OThm psi :: OThm phi :: os) =
                 st_ (OThm (prove_hyp psi phi) ::os)
-   
-          | f CSym (OThm phi :: os) =
+
+          | f 6 CSym (OThm phi :: os) =
                st_ (OThm (sym phi) ::os)
 
-          | f CTrans (OThm psi :: OThm phi :: os) =
+          | f 6 CTrans (OThm psi :: OThm phi :: os) =
                 st_ (OThm (trans phi psi) ::os)
 
-          | f CDefConstList (OThm phi :: OList ls :: os) =
+          | f 6 CDefConstList (OThm phi :: OList ls :: os) =
              let fun lookupT v [] = internal_err ("defineConstList: no def name for the variable "^(fst v))
                    | lookupT v ((x, t)::xs) = (if x = v then t else lookupT v xs)
                  val hyps = Thm.hyps_of phi
@@ -945,64 +858,34 @@ fun raw_read_article
                        end 
                  val (thy', phi', consts) = proc_ext_asgs thy phi [] ext_asgs
              in
-              {stack = OThm phi' :: OList consts :: os, dict = dict, thy = thy'}
+              {stack = OThm phi' :: OList consts :: os, dict = dict, thy = thy', version = version}
              end
-
-          | f c _ = internal_err ("Version 6: illegal stack configuration for the command " ^
+          | f v c _ = internal_err ("Version " ^ string_of_int v ^ ": illegal stack configuration for the command " ^
                                    (lookupC c cmd_table))
       in
-        f command stack
+        f version command stack
       end
 
     fun handler i msg =
         error ("Error on line " ^ ML_Syntax.print_int i ^ ":\n" ^ msg)
 
-
-    fun loop i x =
-      case TextIO.inputLine input of
-        NONE => x before TextIO.closeIn(input)
-      | SOME line =>
-        let
-          val x' = (step (parse (trimr line)) x handle ERR s => handler i s)
-        in
-          loop (i+1) x'
-        end
-
-    fun loop6 i x =
-      case TextIO.inputLine input of
-        NONE => x before TextIO.closeIn(input)
-      | SOME line =>
-        let
-          val x' = (step6 (parse (trimr line)) x handle ERR s => handler i s)
-        in
-          loop6 (i+1) x'
-        end
-
-    fun chk_version x =
-      case TextIO.inputLine input of
-        NONE => x before TextIO.closeIn(input)
-      | SOME line => (case parse (trimr line) of
-                       CNum i => 
-                          (case TextIO.inputLine input of
-                            NONE => x before TextIO.closeIn(input)
-                          | SOME line => 
-                             (case parse (trimr line) of
-                               CVersion => (if i = 6 then loop6 3 {stack = [], dict = Inttab.empty, thy =  thy0}
-                                            else raise ERR ("Unknown version: " ^ string_of_int i))
-                              | _ => loop 2  {stack = [ONum i], dict = Inttab.empty, thy =  thy0}))                
-                     | p => let val x' = (step p x handle ERR s => handler 1 s)
-                            in
-                             loop 2 x'
-                            end)
   in
-    #thy (chk_version {stack = [], dict = Inttab.empty, thy =  thy0})
-(*
-    #thy (loop 1 {stack = [], dict = Inttab.empty, thy =  thy0})
-*)
+    File.fold_lines
+      (fn line => fn (i, x) =>
+        let
+          val x' = (step (parse line) x handle ERR s => handler i s)
+        in
+          (i+1, x')
+        end
+      )
+      path
+      (1, {stack = [], dict = Inttab.empty, thy =  thy0, version = 5})
+    |> #2
+    |> #thy
   end
 
-fun read_article filepath renames thy = raw_read_article (TextIO.openIn (Path.append (Resources.master_directory thy) (Path.explode filepath) |> Path.implode)) renames thy
-(* FIXME: why doesn't this work?
-fun read_article filepath = File.open_input raw_read_article filepath *)
+
+fun read_article filepath renames thy =
+  raw_read_article (Path.append (Resources.master_directory thy) (Path.explode filepath)) renames thy
 
 end
