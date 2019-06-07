@@ -406,10 +406,10 @@ setup \<open>
    ("Data.Sum.+", @{type_name "Sum_Type.sum"})]
 \<close>
 
-setup \<open>OpenTheory.read_article "hol-base-1.2.art" []\<close>
+art_file "hol-base-1.2.art"
 
-setup \<open>OpenTheory.read_article "hol-monad-1.1.art" []\<close>
+art_file "hol-monad-1.1.art"
 
-setup \<open>OpenTheory.read_article "hol-sort-1.0.art" []\<close>
+art_file "hol-sort-1.0.art"
 
 end

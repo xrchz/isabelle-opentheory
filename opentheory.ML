@@ -4,7 +4,7 @@
 
 signature OPENTHEORY =
 sig
-  val read_article : string -> (string * string) list -> theory -> theory
+  val read_article : string -> Position.T -> (string * string) list -> theory -> theory
   val get_thms : theory -> thm list
   val add_thm : attribute
   val del_thm : attribute
@@ -884,8 +884,20 @@ fun raw_read_article
     |> #thy
   end
 
+fun read_article name pos renamings thy =
+  let
+    val full_path = Resources.check_file (Proof_Context.init_global thy) NONE (name, pos)
+  in raw_read_article full_path renamings thy end
 
-fun read_article filepath renames thy =
-  raw_read_article (Path.append (Resources.master_directory thy) (Path.explode filepath)) renames thy
+fun read_article_command name pos renamings = Toplevel.generic_theory (fn gthy =>
+  let
+    val read = read_article name pos renamings
+  in Context.mapping read (Local_Theory.background_theory read) gthy
+  end);
+
+val _ =
+  Outer_Syntax.command \<^command_keyword>\<open>art_file\<close> "read opentheory article file"
+    (Parse.position Parse.path -- Scan.repeat (Parse.string --| \<^keyword>\<open>\<rightharpoonup>\<close> -- Parse.string)  >>
+      (fn ((name, pos), renamings) => read_article_command name pos renamings));
 
 end

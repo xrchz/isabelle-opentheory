@@ -1,8 +1,8 @@
 (* Version: Isabelle2019 *)
 
 theory OpenTheory
-imports Main
-
+  imports Main
+  keywords "art_file" :: thy_decl
 begin
 
 subsection \<open>OpenTheory package\<close>
@@ -85,7 +85,7 @@ lemma [opentheory]:
   "Ex1 = (\<lambda>P. Ex P \<and> (\<forall>x y::'A. P x \<and> P y \<longrightarrow> x = y))"
   unfolding fun_eq_iff by auto
 
-setup \<open>OpenTheory.read_article "bool-int-1.0.art" []\<close>
+art_file "bool-int-1.0.art"
 
 setup \<open>
   fold OpenTheory.add_const
@@ -112,7 +112,7 @@ lemma [opentheory]:
   "\<forall>(f::'A \<Rightarrow> 'B) g. (f = g) = (\<forall>x. f x = g x)"
   unfolding fun_eq_iff by auto
 
-setup \<open>OpenTheory.read_article "bool-choice-1.0.art" []\<close>
+art_file "bool-choice-1.0.art"
 
 
 subsection \<open>Load natural number theories\<close>
@@ -152,7 +152,7 @@ by (intro allI, rule_tac x="rec_nat e (\<lambda>n a. f a n)" in exI, simp)
 
 text \<open>Binary numerals for natural numbers:\<close>
 
-setup \<open>OpenTheory.read_article "natural-numeral-1.0.art" []\<close>
+art_file "natural-numeral-1.0.art"
 
 lemma bit_simps[simp]:
   "bit0 0 = 0 \<and> (\<forall>n. bit0 (Suc n) = Suc (Suc (bit0 n)))"
@@ -180,18 +180,18 @@ lemma [opentheory]:
   (\<forall>m n. (m \<le> Suc n) = (m = Suc n \<or> m \<le> n))"
 by (simp add: le_Suc_eq disj_commute)
 
-setup \<open>OpenTheory.read_article "natural-add-thm-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-add-numeral-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-mult-thm-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-exp-thm-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-order-thm-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-add-order-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-mult-order-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-set-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-even-odd-def-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-even-odd-thm-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-recursion-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "natural-cases-1.0.art" []\<close>
+art_file "natural-add-thm-1.0.art"
+art_file "natural-add-numeral-1.0.art"
+art_file "natural-mult-thm-1.0.art"
+art_file "natural-exp-thm-1.0.art"
+art_file "natural-order-thm-1.0.art"
+art_file "natural-add-order-1.0.art"
+art_file "natural-mult-order-1.0.art"
+art_file "natural-set-1.0.art"
+art_file "natural-even-odd-def-1.0.art"
+art_file "natural-even-odd-thm-1.0.art"
+art_file "natural-recursion-1.0.art"
+art_file "natural-cases-1.0.art"
 
 
 
@@ -229,8 +229,8 @@ lemma [opentheory]:
   "\<forall>(x::'A) (y::'B) (a::'A) b::'B. ((x, y) = (a, b)) = (x = a \<and> y = b)"
 by simp_all
 
-setup \<open>OpenTheory.read_article "pair-induct-1.0.art" []\<close>
-setup \<open>OpenTheory.read_article "pair-abs-1.0.art" []\<close>
+art_file "pair-induct-1.0.art"
+art_file "pair-abs-1.0.art"
 
 text \<open>Constructors, induction, and recursion for options:\<close>
 
@@ -243,7 +243,7 @@ lemma [opentheory]:
     \<exists>fn::'A option \<Rightarrow> 'Z. fn None = NONE' \<and> (\<forall>a::'A. fn (Some a) = SOME' a)"
 by (clarify, rule_tac x="\<lambda>x. case x of None \<Rightarrow> NONE' | Some y \<Rightarrow> SOME' y" in exI, simp)
 
-setup \<open>OpenTheory.read_article "option-thm-1.0.art" []\<close>
+art_file "option-thm-1.0.art"
 
 lemma [opentheory]:
   "(\<forall>(b::'B) f::'A \<Rightarrow> 'B. case_option b f None = b) \<and>
@@ -283,7 +283,7 @@ lemma [opentheory]:
     (\<forall>(f::'A \<Rightarrow> 'B) (h::'A) t::'A list. map f (h # t) = f h # map f t)"
   by simp
 
-setup \<open>OpenTheory.read_article "list-thm-1.0.art" []\<close>
+art_file "list-thm-1.0.art"
 
 subsection \<open>Well-founded relations\<close>
 
@@ -292,6 +292,6 @@ setup \<open>OpenTheory.add_const ("Function.id", @{const_name "id"})\<close>
 lemma [opentheory]: "\<forall>x::'A. id x = x"
   by simp
 
-setup \<open>OpenTheory.read_article "relation-1.0.art" []\<close>
+art_file "relation-1.0.art"
 
 end

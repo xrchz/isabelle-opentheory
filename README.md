@@ -12,7 +12,7 @@ Authors
 * Ramana Kumar: updates to Isabelle2016, tweaks
 * Maksym Bortin: examples for OpenTheory, updates to Isabelle2017
 * Lars Hupel: tweaks
-* Fabian Immler: updates to Isabelle2019, tweaks
+* Fabian Immler: updates to Isabelle2019, tweaks, improved integration into Isabelle/jEdit
 
 Setup
 -----
@@ -28,9 +28,7 @@ Known Issues
 ------------
 
 * The import of OpenTheory articles is single-threaded and hence rather slow.
-* None of the existing code is properly integrated into Isabelle (or jEdit).
-  In particular, there is no `opentheory` command; you have to call the ML function `OpenTheory.read_article`.
-  There is also no markup for article files, nor are changes to the files detected in batch build or interactive mode.
+* There is no markup for article files, nor are changes to the files detected in batch build or interactive mode.
 * The `get_arts` script requires the `opentheory` executable.
   The ML code is not able to fetch the `*.art` files itself.
   Even though [a component](https://github.com/isabelle-prover/opentheory-component) porting OpenTheory to Isabelle/ML exists, that is not used.

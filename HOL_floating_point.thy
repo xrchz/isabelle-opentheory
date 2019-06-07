@@ -10,6 +10,6 @@ setup \<open>
    ("HOL4.fcp.bit1", @{type_name "HOL4.fcp.bit1"})]
 \<close>
 
-setup \<open>OpenTheory.read_article "hol-floating-point-1.1.art" []\<close>
+art_file "hol-floating-point-1.1.art"
 
 end

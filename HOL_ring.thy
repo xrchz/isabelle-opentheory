@@ -9,7 +9,7 @@ setup \<open>
   [("HOL4.ind_type.recspace", @{type_name "HOL_base.HOL4.ind_type.recspace"})]
 \<close>
 
-setup \<open>OpenTheory.read_article "hol-ring-1.1.art" []\<close>
+art_file "hol-ring-1.1.art"
 
 
 end

@@ -123,7 +123,7 @@ lemma[opentheory] :
 by fastforce
 
 
-setup \<open>OpenTheory.read_article "natural-distance-1.52.art" []\<close>
+art_file "natural-distance-1.52.art"
 
 
 
@@ -133,7 +133,7 @@ setup \<open>
     ("Set.{}", @{const_name "Orderings.bot_class.bot"})]
 \<close>
 
-setup \<open>OpenTheory.read_article "real-1.61.art" []\<close>
+art_file "real-1.61.art"
 
 setup \<open>
   fold OpenTheory.add_tyop
@@ -143,7 +143,7 @@ setup \<open>
 
 
 
-setup \<open>OpenTheory.read_article "hol-real-1.1.art" []\<close>
+art_file "hol-real-1.1.art"
 
 
 end

@@ -13,7 +13,7 @@ setup \<open>
   [("HOL4.state_transformer.FOR", @{const_name "HOL_base.HOL4.state_transformer.FOR"})]
 \<close>
 
-setup \<open>OpenTheory.read_article "arm-model-1.1.art" []\<close>
+art_file "arm-model-1.1.art"
 
 
 
@@ -46,7 +46,7 @@ setup \<open>
 
 
 
-setup \<open>OpenTheory.read_article "arm-step-1.1.art" []\<close>
+art_file "arm-step-1.1.art"
 
 
 
@@ -62,12 +62,12 @@ lemma[opentheory] :
 by fastforce
 
 
-setup \<open>OpenTheory.read_article "machine-code-hoare-logic-1.1.art" []\<close>
-setup \<open>OpenTheory.read_article "machine-code-hoare-logic-state-1.1.art" []\<close>
+art_file "machine-code-hoare-logic-1.1.art"
+art_file "machine-code-hoare-logic-state-1.1.art"
 
 
 
-setup \<open>OpenTheory.read_article "arm-prog-1.1.art" []\<close>
+art_file "arm-prog-1.1.art"
 
 
 
@@ -79,6 +79,6 @@ setup \<open>
 \<close>
 
 
-setup \<open>OpenTheory.read_article "arm-decomp-1.0.art" []\<close>
+art_file "arm-decomp-1.0.art"
 
 end

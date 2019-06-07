@@ -13,7 +13,7 @@ setup \<open>
 \<close>
 
 
-setup \<open>OpenTheory.read_article "hol-words-1.2.art" []\<close>
+art_file "hol-words-1.2.art"
 
 
 end

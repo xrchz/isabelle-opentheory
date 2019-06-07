@@ -17,7 +17,7 @@ setup \<open>
 \<close>
 
 
-setup \<open>OpenTheory.read_article "hol-integer-1.1.art" []\<close>
+art_file "hol-integer-1.1.art"
 
 
 end
