@@ -4,7 +4,7 @@ imports HOL_words HOL_ring HOL_quotient
 begin
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.fcp.cart", @{type_name "HOL_words.HOL4.fcp.cart"}),
    ("HOL4.ring.ring", @{type_name "HOL_ring.HOL4.ring.ring"}),
@@ -14,10 +14,10 @@ setup {*
    ("HOL4.quote.varmap", @{type_name "HOL_ring.HOL4.quote.varmap"}),
    ("HOL4.quote.index", @{type_name "HOL_ring.HOL4.quote.index"}),
    ("HOL4.prelim.ordering", @{type_name "HOL_ring.HOL4.prelim.ordering"})]
-*}
+\<close>
 
 
-setup {* OpenTheory.read_article "hol-integer-1.1.art" [] *}
+art_file "hol-integer-1.1.art"
 
 
 end

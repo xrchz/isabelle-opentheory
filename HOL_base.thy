@@ -22,7 +22,7 @@ lemma[opentheory] :
 by fastforce
 
 lemma[opentheory] :
-"op \<circ> = (\<lambda>(f::'B \<Rightarrow> 'C) (g::'A \<Rightarrow> 'B) x::'A. f (g x))"
+"(\<circ>) = (\<lambda>(f::'B \<Rightarrow> 'C) (g::'A \<Rightarrow> 'B) x::'A. f (g x))"
 by((rule ext)+, simp)
 
 lemma[opentheory] :
@@ -339,7 +339,7 @@ done
 
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_const
   [("select", @{const_name "Eps"}),
    ("Data.Unit.()", @{const_name "Product_Type.Unity"}),
@@ -396,20 +396,20 @@ setup {*
    ("Number.Natural.max", @{const_name "max"}),
    ("Number.Natural.min", @{const_name "min"}),
    ("Number.Natural.factorial", @{const_name "factorial"})]
-*}
+\<close>
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("ind", @{type_name "ind"}),
    ("Set.set", @{type_name "set"}),
    ("Data.Unit.unit", @{type_name "Product_Type.unit"}),
    ("Data.Sum.+", @{type_name "Sum_Type.sum"})]
-*}
+\<close>
 
-setup {* OpenTheory.read_article "hol-base-1.2.art" [] *}
+art_file "hol-base-1.2.art"
 
-setup {* OpenTheory.read_article "hol-monad-1.1.art" [] *}
+art_file "hol-monad-1.1.art"
 
-setup {* OpenTheory.read_article "hol-sort-1.0.art" [] *}
+art_file "hol-sort-1.0.art"
 
 end

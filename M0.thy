@@ -3,10 +3,10 @@ theory M0
 imports ARM
 begin
 
-setup {* OpenTheory.read_article "m0-model-1.0.art" [] *}
+art_file "m0-model-1.0.art"
 
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.m0.RName", @{type_name "HOL4.m0.RName"}),
    ("HOL4.m0.ARM_Exception", @{type_name "HOL4.m0.ARM_Exception"}),
@@ -24,19 +24,19 @@ setup {*
    ("HOL4.m0.MachineCode", @{type_name "HOL4.m0.MachineCode"}),
    ("HOL4.m0.instruction", @{type_name "HOL4.m0.instruction"}),
    ("HOL4.m0.exception", @{type_name "HOL4.m0.exception"})]
-*}
+\<close>
 
-setup {* OpenTheory.read_article "m0-step-1.0.art" [] *}
-setup {* OpenTheory.read_article "m0-prog-1.0.art" [] *}
+art_file "m0-step-1.0.art"
+art_file "m0-prog-1.0.art"
 
-setup {*
+setup \<open>
   fold OpenTheory.add_tyop
   [("HOL4.m0_prog.m0_component", @{type_name "HOL4.m0_prog.m0_component"}),
    ("HOL4.m0_prog.m0_data", @{type_name "HOL4.m0_prog.m0_data"})]
 
-*}
+\<close>
 
-setup {* OpenTheory.read_article "m0-decomp-1.0.art" [] *}
+art_file "m0-decomp-1.0.art"
 
 
 end
